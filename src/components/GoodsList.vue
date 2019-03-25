@@ -75,13 +75,13 @@
               <Row type="flex" justify="center">
                 <Col span="10">
                   <FormItem label="已出售量">
-                      <Input v-model="newGoodInfo.goodName" style="width: 400px;" placeholder="请输入已出售量">
+                      <Input v-model="newGoodInfo.seltAmount" style="width: 400px;" placeholder="请输入已出售量">
                       </Input>
                   </FormItem>
                 </Col>
                 <Col span="10">
                   <FormItem label="限购量">
-                    <Input v-model="newGoodInfo.goodUnit" style="width: 400px;" placeholder="请输入限购量">
+                    <Input v-model="newGoodInfo.limitedAmount" style="width: 400px;" placeholder="请输入限购量">
                     </Input>
                   </FormItem>
                 </Col>
@@ -102,7 +102,7 @@
                 </Col>
                 <Col span="10">
                   <FormItem label="服务内容">
-                    <Input v-model="newGoodInfo.goodName" type="textarea" :rows="6" style="width: 400px;" placeholder="例子：正品保障,极速发货,7天退换货。多个请使用英文逗号,分隔">
+                    <Input v-model="newGoodInfo.content" type="textarea" :rows="6" style="width: 400px;" placeholder="例子：正品保障,极速发货,7天退换货。多个请使用英文逗号,分隔">
                     </Input>
                   </FormItem>
                 </Col>
@@ -110,13 +110,13 @@
               <Row type="flex" justify="center">
                 <Col span="10">
                   <FormItem label="售价">
-                      <Input v-model="newGoodInfo.goodName" style="width: 400px;" placeholder="请输入已出售量">
+                      <Input v-model="newGoodInfo.curPrice" style="width: 400px;" placeholder="请输入已出售量">
                       </Input>
                   </FormItem>
                 </Col>
                 <Col span="10">
                   <FormItem label="原价">
-                    <Input v-model="newGoodInfo.goodUnit" style="width: 400px;" placeholder="请输入限购量">
+                    <Input v-model="newGoodInfo.oldPrice" style="width: 400px;" placeholder="请输入限购量">
                     </Input>
                   </FormItem>
                 </Col>
@@ -174,7 +174,7 @@
               <Row type="flex" justify="center">
                   <Col span="10">
                     <FormItem label="商品库存">
-                        <Input v-model="newGoodInfo.goodName" style="width: 400px;" placeholder="请输入商品库存" :disabled="stockDisabled">
+                        <Input v-model="newGoodInfo.stock" style="width: 400px;" placeholder="请输入商品库存" :disabled="stockDisabled">
                           <span slot="append">件</span>
                         </Input>
                     </FormItem>
@@ -267,6 +267,12 @@ export default {
                     value: params.row.stock,
                     style: "text-align:center;",
                     min: 0
+                  },
+                  on: {
+                    input: (event) => {
+                      params.row.stock = event;
+                      this.stockData[params.index].stock = params.row.stock;
+                    }
                   }
               })
             ])
@@ -283,6 +289,12 @@ export default {
                     value: params.row.price,
                     style: "text-align:center;",
                     min: 0
+                  },
+                  on: {
+                    input: (event) => {
+                      params.row.price = event;
+                      this.stockData[params.index].price = params.row.price;
+                    }
                   }
               })
             ])
@@ -291,7 +303,16 @@ export default {
         {
           title: '规格图片',
           key: 'img',
-          align: 'center'
+          align: 'center',
+          render: (h, params) => {
+            return h('div', [
+              h('Upload',  {
+                  props: {
+                    action: "//"
+                  }
+              }, [h('Button', {attrs: {icon: "ios-cloud-upload", style: "color: #3399ff"}}, "上传规格图片")])
+            ])
+          }
         }
       ],
       stockData: [],
@@ -442,6 +463,13 @@ export default {
         goodName: '',
         goodUnit: '件',
         imgList: [],
+        seltAmount: 0,
+        limitedAmount: 0,
+        goodSmallImg: '',
+        content: '',
+        curPrice: '',
+        oldPrice: '',
+        stock: ''
       },
       classifyList: [
         {
@@ -619,7 +647,8 @@ export default {
       this.$Message.success('取消移除！');
     },
     ok2() {
-
+      console.log(this.stockData);
+      console.log(this.newGoodInfo);
     },
     cancel2() {
 
@@ -714,6 +743,9 @@ export default {
     },
     changeTableData() {
       this.stockData = [];
+      if(this.moduleList.length == 0) {
+        return;
+      }
       for (var i = 0; i < this.moduleList[0].value.length; i++) {
         if(this.moduleList.length < 2) {
           this.stockData.push(
