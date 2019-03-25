@@ -6,6 +6,7 @@ import router from './router'
 import iView from 'iview'
 import store from './vuex';
 import echarts from 'echarts';
+import axios from './axios_config.js'
 
 Vue.config.productionTip = false
 
@@ -14,6 +15,7 @@ Vue.prototype.$echarts = echarts;
 import 'iview/dist/styles/iview.css';
 Vue.use(iView);
 
+Object.defineProperty(Vue.prototype, '$axios', { value: axios });
 
 router.beforeEach((to, from, next) => {
   iView.LoadingBar.start();
