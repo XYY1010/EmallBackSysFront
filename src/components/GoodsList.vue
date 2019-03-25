@@ -48,27 +48,171 @@
       <div class="addGoodsClassify">
         <div style="text-align: center; padding: 10px 0px 10px 0px;">
           <h2>选择分类</h2>
-          <Select v-model="newGoodInfo.classify" style="width: 300px; margin: 5px 0px 5px 0px;" placeholder="请选择分类">
+          <Select v-model="newGoodInfo.classify" style="width: 300px; margin: 10px 0px 5px 0px;" placeholder="请选择分类">
               <Option v-for="(item, index) in classifyList" :value="item.value" :key="item.value">{{item.label}}</Option>
           </Select>
         </div>
       </div>
       <div class="addGoodsBaseInfo">
-        <div style="text-align: center; padding: 10px 0px 10px 0px;">
+        <div style="text-align: center; padding: 10px 0px 0px 0px;">
           <h2>商品基本信息</h2>
-          <div style="10px 20px 10px 20px;">
-            <Form :model="newGoodInfo" label-position="right">
-              <Row :gutter="32">
-                  <Col span="12">
+          <div style="margin:10px 20px 0px 20px;">
+            <Form :model="newGoodInfo" label-position="right" :label-width="120">
+              <Row type="flex" justify="center">
+                  <Col span="10">
                     <FormItem label="商品名称">
-                        <Input v-model="newGoodInfo.goodName" style="width: 200px;" placeholder="请输入商品名称">
+                        <Input v-model="newGoodInfo.goodName" style="width: 400px;" placeholder="请输入商品名称">
                         </Input>
                     </FormItem>
                   </Col>
-                  <Col span="12">
+                  <Col span="10">
                     <FormItem label="商品单位">
-                      <Input v-model="newGoodInfo.goodUnit" style="width: 200px;" placeholder="请输入商品单位">
+                      <Input v-model="newGoodInfo.goodUnit" style="width: 400px;" placeholder="请输入商品单位">
                       </Input>
+                    </FormItem>
+                  </Col>
+              </Row>
+              <Row type="flex" justify="center">
+                <Col span="10">
+                  <FormItem label="已出售量">
+                      <Input v-model="newGoodInfo.goodName" style="width: 400px;" placeholder="请输入已出售量">
+                      </Input>
+                  </FormItem>
+                </Col>
+                <Col span="10">
+                  <FormItem label="限购量">
+                    <Input v-model="newGoodInfo.goodUnit" style="width: 400px;" placeholder="请输入限购量">
+                    </Input>
+                  </FormItem>
+                </Col>
+              </Row>
+              <Row type="flex" justify="center">
+                <Col span="10">
+                  <FormItem label="商品缩略图">
+                    <Upload
+                      multiple
+                      type="drag"
+                      action="//jsonplaceholder.typicode.com/posts/" style="width:400px; margin: 0 0 0 10px;">
+                      <div style="padding: 20px 0">
+                          <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>
+                          <p>点击或拖拽入此区域进行上传</p>
+                      </div>
+                  </Upload>
+                  </FormItem>
+                </Col>
+                <Col span="10">
+                  <FormItem label="服务内容">
+                    <Input v-model="newGoodInfo.goodName" type="textarea" :rows="6" style="width: 400px;" placeholder="例子：正品保障,极速发货,7天退换货。多个请使用英文逗号,分隔">
+                    </Input>
+                  </FormItem>
+                </Col>
+              </Row>
+              <Row type="flex" justify="center">
+                <Col span="10">
+                  <FormItem label="售价">
+                      <Input v-model="newGoodInfo.goodName" style="width: 400px;" placeholder="请输入已出售量">
+                      </Input>
+                  </FormItem>
+                </Col>
+                <Col span="10">
+                  <FormItem label="原价">
+                    <Input v-model="newGoodInfo.goodUnit" style="width: 400px;" placeholder="请输入限购量">
+                    </Input>
+                  </FormItem>
+                </Col>
+              </Row>
+              <Row type="flex" justify="center">
+                <Col span="10">
+                  <FormItem label="商品图片">
+                    <div class="demo-upload-list" v-for="item in uploadList">
+                      <template v-if="item.status === 'finished'">
+                          <img :src="item.url">
+                          <div class="demo-upload-list-cover">
+                              <Icon type="ios-eye-outline" @click.native="handleView(item.name)"></Icon>
+                              <Icon type="ios-trash-outline" @click.native="handleRemove(item)"></Icon>
+                          </div>
+                      </template>
+                      <template v-else>
+                          <Progress v-if="item.showProgress" :percent="item.percentage" hide-info></Progress>
+                      </template>
+                    </div>
+                    <Upload
+                      ref="upload"
+                      :show-upload-list="false"
+                      :on-success="handleSuccess"
+                      :format="['jpg','jpeg','png']"
+                      :max-size="2048"
+                      :on-format-error="handleFormatError"
+                      :on-exceeded-size="handleMaxSize"
+                      :before-upload="handleBeforeUpload"
+                      multiple
+                      type="drag"
+                      action="//jsonplaceholder.typicode.com/posts/"
+                      style="display: inline-block;width:58px;">
+                      <div style="width: 58px;height:58px;line-height: 58px;">
+                          <Icon type="ios-add" size="30"></Icon>
+                      </div>
+                  </Upload>
+                  <Modal title="View Image" v-model="visible">
+                      <img :src="'https://o5wwk8baw.qnssl.com/' + imgName + '/large'" v-if="visible" style="width: 100%">
+                  </Modal>
+                  </FormItem>
+                </Col>
+                <Col span="10">
+                </Col>
+              </Row>
+            </Form>
+          </div>
+        </div>
+      </div>
+
+      <div class="addGoodsStock">
+        <div style="text-align: center; padding: 10px 0px 10px 0px;">
+          <h2>规格库存</h2>
+          <div style="margin:10px 20px 0px 20px;">
+            <Form :model="newGoodInfo" label-position="right" :label-width="120">
+              <Row type="flex" justify="center">
+                  <Col span="10">
+                    <FormItem label="商品库存">
+                        <Input v-model="newGoodInfo.goodName" style="width: 400px;" placeholder="请输入商品库存" :disabled="stockDisabled">
+                          <span slot="append">件</span>
+                        </Input>
+                    </FormItem>
+                  </Col>
+                  <Col span="10">
+                    <FormItem label="是否使用规格">
+                      <Checkbox v-model="single" @on-change="checkBoxChange">使用规格</Checkbox>
+                    </FormItem>
+                  </Col>
+              </Row>
+              <Row type="flex" justify="center" v-show="moduleGroupShow">
+                  <Col span="10">
+                    <FormItem label="规格组和规格值">
+                        <Input v-model="moduleGroup" style="width: 400px;" placeholder="如颜色、尺码、套餐">
+                          <span slot="prepend">规格组</span>
+                          <Button slot="append" @click="addModule">添加</Button>
+                        </Input>
+                    </FormItem>
+                    <div class="module" v-for="(item, index) in moduleList" :key="index">
+                      <h3>{{item.name}} <Icon type="ios-close-circle" size="15" @click="removeModule(index)"></Icon></h3>
+                      <div style="display: inline-block; text-align: left;">
+                        <div class="moduleVule" v-for="(value, i) in item.value" :key="i">
+                          <span style="background: #eee; padding: 2px 5px 2px 5px; margin: 5px 10px 5px 10px;">{{value.name}}<Icon type="md-close" size="15" @click="removeValue(index, i)"></Icon></span>
+                        </div>
+                      </div>
+                      <Input v-model="item.valueInput" style="width: 350px; margin: 10px 0px 10px 20px" placeholder="如红色、白色">
+                        <span slot="prepend">规格值</span>
+                        <Button slot="append" @click="addModuleValue(index)">添加</Button>
+                      </Input>
+                    </div>
+                  </Col>
+                  <Col span="10">
+                  </Col>
+              </Row>
+              <Row type="flex" justify="center" v-show="moduleGroupShow">
+                  <Col span="20">
+                    <FormItem label="价格和库存">
+                      <Table border :columns="columns1" :data="stockData" no-data-text="请设置规格值~~~"></Table>
                     </FormItem>
                   </Col>
               </Row>
@@ -76,9 +220,10 @@
           </div>
         </div>
       </div>
+
     </Modal>
 
-    <Table border ref="selection" :current="curPage" :columns="columns" :data="historyData" @on-selection-change="select" no-data-text="暂无商品，请添加~~~"></Table>
+    <Table border ref="selection" :current="curPage" :columns="columns" :data="historyData" no-data-text="暂无商品，请添加~~~"></Table>
     <Page :total="dataCount" :page-size="pageSize" show-total class="paging" @on-change="changepage"></Page>
   </div>
 </template>
@@ -102,6 +247,54 @@ export default {
       rmIndex: -1,
       show: false,
       curPage: 1,
+      imgName: '',
+      visible: false,
+      uploadList: [],
+      single: false,
+      moduleGroupShow: false,
+      stockDisabled: false,
+      moduleList: [],
+      moduleGroup: '',
+      columns1: [
+        {
+          title: '库存',
+          key: 'stock',
+          align: 'center',
+          render: (h, params) => {
+            return h('div', [
+              h('InputNumber', {
+                  attrs: {
+                    value: params.row.stock,
+                    style: "text-align:center;",
+                    min: 0
+                  }
+              })
+            ])
+          }
+        },
+        {
+          title: '价格',
+          key: 'price',
+          align: 'center',
+          render: (h, params) => {
+            return h('div', [
+              h('InputNumber', {
+                  attrs: {
+                    value: params.row.price,
+                    style: "text-align:center;",
+                    min: 0
+                  }
+              })
+            ])
+          }
+        },
+        {
+          title: '规格图片',
+          key: 'img',
+          align: 'center'
+        }
+      ],
+      stockData: [],
       goodsData: [
         {
             "item_id": "37849334754447360",
@@ -247,7 +440,8 @@ export default {
       newGoodInfo: {
         classify: '',
         goodName: '',
-        goodUnit: '件'
+        goodUnit: '件',
+        imgList: [],
       },
       classifyList: [
         {
@@ -429,10 +623,143 @@ export default {
     },
     cancel2() {
 
+    },
+    handleView (name) {
+      this.imgName = name;
+      this.visible = true;
+    },
+    handleRemove (file) {
+      const fileList = this.$refs.upload.fileList;
+      this.$refs.upload.fileList.splice(fileList.indexOf(file), 1);
+    },
+    handleSuccess (res, file) {
+      file.url = 'https://o5wwk8baw.qnssl.com/7eb99afb9d5f317c912f08b5212fd69a/avatar';
+      file.name = '7eb99afb9d5f317c912f08b5212fd69a';
+    },
+    handleFormatError (file) {
+      this.$Notice.warning({
+        title: '文件格式不正确',
+        desc: file.name + ' 文件格式不正确, 请重新选择 jpg 或 png。'
+      });
+    },
+    handleMaxSize (file) {
+      this.$Notice.warning({
+        title: '超出文件大小限制',
+        desc: file.name + ' 文件大小太大了, 不能超过 2M。'
+      });
+    },
+    handleBeforeUpload () {
+      const check = this.uploadList.length < 5;
+      if (!check) {
+        this.$Notice.warning({
+          title: '最多上传五张图片。'
+        });
+      }
+      return check;
+    },
+    checkBoxChange() {
+      if (this.single === true) {
+        this.moduleGroupShow = true;
+        this.stockDisabled = true;
+      } else {
+        this.moduleGroupShow = false;
+        this.stockDisabled = false;
+      }
+    },
+    addModule() {
+      if (this.moduleList.length >= 3) {
+        this.$Message.error("规格组设置不能超过三个！！！");
+        return;
+      }
+      if (this.moduleGroup.length == 0) {
+        this.$Message.error("请输入规格组名！！！");
+      } else {
+        this.moduleList.push({
+          name: this.moduleGroup,
+          valueInput: '',
+          value: []
+        });
+        this.changeColumns(this.moduleGroup, this.moduleList.length-1);
+      }
+      this.moduleGroup = '';
+    },
+    removeModule(index) {
+      this.moduleList.splice(index, 1);
+      this.columns1.splice(index, 1);
+      this.changeTableData();
+    },
+    addModuleValue(index) {
+      if (this.moduleList[index].valueInput.length == 0) {
+        this.$Message.error("请输入规格值名！！！");
+      } else {
+        this.moduleList[index].value.push({
+          name: this.moduleList[index].valueInput,
+        });
+        this.changeTableData();
+      }
+      this.moduleList[index].valueInput = '';
+    },
+    removeValue(index, i) {
+      this.moduleList[index].value.splice(i, 1);
+      this.changeTableData();
+    },
+    changeColumns(e, index) {
+      this.columns1.splice(index, 0,
+        {
+          title: e,
+          key: "module" + index,
+          align: "center"
+        }
+      );
+    },
+    changeTableData() {
+      this.stockData = [];
+      for (var i = 0; i < this.moduleList[0].value.length; i++) {
+        if(this.moduleList.length < 2) {
+          this.stockData.push(
+            {
+              module0: this.moduleList[0].value[i].name,
+              stock: 0,
+              price: 0,
+              img: []
+            }
+          );
+        } else {
+          for (var j = 0; j < this.moduleList[1].value.length; j++) {
+            if(this.moduleList.length < 3) {
+              this.stockData.push(
+                {
+                  module0: this.moduleList[0].value[i].name,
+                  module1: this.moduleList[1].value[j].name,
+                  stock: 0,
+                  price: 0,
+                  img: []
+                }
+              );
+            } else {
+              for (var k = 0; k < this.moduleList[2].value.length; k++) {
+                this.stockData.push(
+                  {
+                    module0: this.moduleList[0].value[i].name,
+                    module1: this.moduleList[1].value[j].name,
+                    module2: this.moduleList[2].value[k].name,
+                    stock: 0,
+                    price: 0,
+                    img: []
+                  }
+                );
+              }
+            }
+          }
+        }
+      }
     }
   },
   created() {
     this.handleListApproveHistory();
+  },
+  mounted () {
+    this.uploadList = this.$refs.upload.fileList;
   }
 }
 </script>
@@ -467,5 +794,60 @@ export default {
   margin: 10px 50px 10px 50px;
   border: 1px solid #ccc;
   border-radius: 10px;
+}
+
+.addGoodsStock {
+  width: 95%;
+  margin: 10px 50px 10px 50px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+}
+
+.demo-upload-list{
+  display: inline-block;
+  width: 60px;
+  height: 60px;
+  text-align: center;
+  line-height: 60px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #fff;
+  position: relative;
+  box-shadow: 0 1px 1px rgba(0,0,0,.2);
+  margin-right: 4px;
+}
+.demo-upload-list img{
+  width: 100%;
+  height: 100%;
+}
+.demo-upload-list-cover{
+  display: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,.6);
+}
+.demo-upload-list:hover .demo-upload-list-cover{
+  display: block;
+}
+.demo-upload-list-cover i{
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  margin: 0 2px;
+}
+.module {
+  width: 400px;
+  margin: 10px 50px 10px 120px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+.moduleVule {
+  text-align: left;
+  display: inline-block;
+  margin: 2px;
 }
 </style>
