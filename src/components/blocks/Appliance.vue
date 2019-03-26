@@ -3,13 +3,13 @@
     <Alert show-icon class="tips-box" type="warning">
         小提示
         <Icon type="md-bulb" slot="icon"></Icon>
-        <template slot="desc">首页智能硬件板块管理。</template>
+        <template slot="desc">首页配件板块管理。</template>
     </Alert>
     <div class="btns-div">
       <Button type="primary" icon="md-refresh" size="large" @click="changeAD">更换左侧宣传广告</Button>
       显示 <InputNumber v-model="pageSize" size="large" @on-change="changePageSize" :min="1" :max="8"></InputNumber> 条
     </div>
-    <Table border :columns="columns" :data="historyData" no-data-text="手机模块信息空空如也，请添加~~~"></Table>
+    <Table border :columns="columns" :data="historyData" no-data-text="配件模块信息空空如也，请添加~~~"></Table>
     <Page :total="dataCount" :page-size="pageSize" show-total class="paging" @on-change="changepage"></Page>
 
     <Modal
@@ -17,26 +17,25 @@
             title="更换左侧宣传图"
             @on-ok="ok"
             @on-cancel="cancel">
-            <Form :model="newHardwareData">
+            <Form :model="newPhoneData">
                 <Row :gutter="32">
                     <Col span="12">
                         <FormItem label="跳转链接" label-position="top">
-                            <Input v-model="newHardwareData.sourceUrl" placeholder="请输入跳转链接">
+                            <Input v-model="newPhoneData.sourceUrl" placeholder="请输入跳转链接">
                             </Input>
                         </FormItem>
                     </Col>
                     <Col span="12">
                         <FormItem label="宣传图Url" label-position="top">
-                          <Input v-model="newHardwareData.imgUrl" placeholder="请输入缩略图地址">
+                          <Input v-model="newPhoneData.imgUrl" placeholder="请输入缩略图地址">
                           </Input>
                         </FormItem>
                     </Col>
                 </Row>
-
                 <Row :gutter="32">
                   <Col span="12">
                     <FormItem label="宣传图" label-position="top">
-                      <Img :src="newHardwareData.imgUrl" style="width:134px;height:314px;"/>
+                      <Img :src="newPhoneData.imgUrl" style="width:134px;height:314px;"/>
                     </FormItem>
                   </Col>
                   <Col span="12">
@@ -76,6 +75,22 @@
                 </Row>
                 <Row :gutter="32">
                     <Col span="12">
+                        <FormItem label="优惠类型" label-position="top">
+                            <Select v-model="formData.discountType" placeholder="请选择类型">
+                                <Option value="new">新品</Option>
+                                <Option value="discount">折扣</Option>
+                                <Option value="free">免邮</Option>
+                            </Select>
+                        </FormItem>
+                    </Col>
+                    <Col span="12">
+                        <FormItem label="优惠描述" label-position="top">
+                            <Input placeholder="请输入价格描述" v-model="formData.discount"></Input>
+                        </FormItem>
+                    </Col>
+                </Row>
+                <Row :gutter="32">
+                    <Col span="12">
                         <FormItem label="现价" label-position="top">
                           <InputNumber
                            size="large"
@@ -91,22 +106,6 @@
                            :min="0"
                            v-model="formData.oldPrice===undefined?0:formData.oldPrice"
                            :formatter="value => `￥ ${value}`"></InputNumber>
-                        </FormItem>
-                    </Col>
-                </Row>
-                <Row :gutter="32">
-                    <Col span="12">
-                        <FormItem label="优惠类型" label-position="top">
-                            <Select v-model="formData.discountType" placeholder="请选择类型">
-                                <Option value="new">新品</Option>
-                                <Option value="discount">折扣</Option>
-                                <Option value="free">免邮</Option>
-                            </Select>
-                        </FormItem>
-                    </Col>
-                    <Col span="12">
-                        <FormItem label="优惠描述" label-position="top">
-                            <Input placeholder="请输入价格描述" v-model="formData.discount"></Input>
                         </FormItem>
                     </Col>
                 </Row>
@@ -148,7 +147,7 @@
 
 <script>
 export default {
-  name: 'hardware',
+  name: 'appliance',
   data() {
     return {
       ajaxHistoryData:[],
@@ -192,11 +191,6 @@ export default {
         {
           title: '商品名',
           key: 'title',
-          align: 'center'
-        },
-        {
-          title: '商品描述',
-          key: 'desc',
           align: 'center'
         },
         {
@@ -294,9 +288,7 @@ export default {
                       this.formData.title = params.row.title;
                       this.formData.sourceUrl = params.row.sourceUrl;
                       this.formData.imgUrl = params.row.imgUrl;
-                      this.formData.desc = params.row.desc;
                       this.formData.price = params.row.price;
-                      this.formData.oldPrice = params.row.oldPrice;
                       this.formData.sorted = params.row.sorted;
                       this.formData.discount = params.row.discount;
                       this.formData.discountType = params.row.discountType;
@@ -307,19 +299,26 @@ export default {
           }
         }
       ],
-      hardwareData: [
-        {id:1, sourceUrl: '//item.mi.com/1161200059.html', imgUrl: 'http://i3.mifile.cn/a4/T1rQAgB7Av1RXrhCrK.jpg', title: '小米路由器3', desc: '四天线设计，更安全更稳定', price: '149', discountType: 'free', discount: '免邮费', sorted: 1},
-        {id:2, sourceUrl: '//www.mi.com/mibicycle/', imgUrl: 'http://i3.mifile.cn/a4/2b69b930-a2fd-4d09-a46a-8690cb79f764', title: '电助力折叠自行车', desc: '力矩传感电助力，让城市出行轻松有趣', price: '149', discountType: 'new', discount: '新品', sorted: 2},
-        {id:3, sourceUrl: '//www.mi.com/mitu/', imgUrl: 'http://i1.mifile.cn/a1/pms_1464615180.86261317!220x220.jpg', title: '米兔智能故事机', desc: '能说会道，宝宝的好玩伴', price: '199', discountType: 'new', discount: '新品', sorted: 3},
-        {id:4, sourceUrl: '//www.mi.com/water2/', imgUrl: '//i3.mifile.cn/a4/T1zTK_Bbhv1RXrhCrK.jpg', title: '小米净水器', desc: '厨下式 RO反渗透直出纯净水，包邮包安装', price: '1999', sorted: 4},
-        {id:5, sourceUrl: '//www.mi.com/ihealth/ ', imgUrl: 'http://i1.mifile.cn/a1/T17FCQByWv1RXrhCrK!220x220.jpg', title: 'iHealth智能血压计（蓝牙版）', desc: '送给父母的健康礼物 测血压仅需1步', price: '199', sorted: 5},
-        {id:6, sourceUrl: '//www.mi.com/dianfanbao/', imgUrl: 'http://i1.mifile.cn/a1/T1OVC_ByY_1RXrhCrK!220x220.jpg', title: '米家压力IH电饭煲', desc: '智能烹饪，3L 容量', price: '999', sorted: 6},
-        {id:7, sourceUrl: '//item.mi.com/1163200015.html', imgUrl: 'http://i1.mifile.cn/a1/pms_1470730028.12443689!220x220.jpg', title: '全系智能套装限时款', desc: '开启你的智能生活', price: '292', oldPrice: '325', discountType: 'discount', discount: '享九折', sorted: 7},
-        {id:8, sourceUrl: '//list.mi.com/accessories/tag?id=guangganban', imgUrl: 'http://i1.mifile.cn/a1/T1HcAQBgDT1RXrhCrK!220x220.jpg', title: '小米手环 光感版', desc: '实时监测心率，科学运动', price: '99', sorted: 8}
+      applianceData: [
+        {sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1539315570.63599432!220x220.jpg', title: '小米电视4X 43英寸', price: '1399',
+				reviewDesc: '电视很好，够清晰，这个价格打特价很划算.', reviewAuthor: '1432693760', reviewStatus: true, discountType: 'new', discount: '新品'},
+				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1510111588.69169839!220x220.jpg', title: '小米电视4 55英寸', price: '3699', oldPrice: '3999', discountType: 'discount', discount: '减300元', desc: '4.9mm 极超薄机身 / 2GB+8GB 大内存空间',
+				reviewDesc: '很惊艳，全家人都很喜欢，感觉有点买小了！效果也不错', reviewAuthor: '妳狠重要', reviewStatus: true},
+				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1500287084.72131750!220x220.jpg', title: '小米电视4A 32英寸', price: '899', desc: '64位四核处理器 / 1GB+4GB大内存',
+				reviewDesc: '放在次卧，看着刚好，清晰度能接受，一台红米的这个价格...', reviewAuthor: '▓▓▓▓', reviewStatus: true, discountType: 'discount', discount: '减100元', oldPrice: '999'},
+				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1522318330.86967810!220x220.jpg', title: '小米电视4C 50英寸', price: '1899', desc: '4K HDR / 人工智能语音',
+				reviewDesc: '朋友同事来家都说电视超值，非常棒，花最少的钱，享最好...', reviewAuthor: '煎饼', reviewStatus: true, oldPrice: '39', discountType: 'discount', discount: '减300', oldPrice: '2199'},
+				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1539855763.04646220!220x220.jpg', title: '小米电视4A 58英寸', price: '2499',
+				reviewDesc: '电视非常大，智能语言遥控，画面清析，效果好，这是第二...', reviewAuthor: '大民', reviewStatus: true, discountType: 'new', discount:'新品'},
+				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1540366231.87578189!220x220.jpg', title: '小米电视4 65英寸全面屏旗舰版', price: '5999',
+				reviewDesc: '电视非常好，大气，非常清楚。我是相信小米，希望小米的...', reviewAuthor: '2171033765', reviewStatus: true, discountType: 'new', discount: '新品'},
+				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1499072633.96298268!220x220.jpg', title: '小米盒子3 增强版', price: '399', desc: '高端 4K 网络机顶盒',
+				reviewDesc: '小米盒子3增强版外观精致，设计精巧，运行速度很快，操...', reviewAuthor: 'jin', reviewStatus: true, oldPrice: '449', discountType: 'discount', discount: '减50元'},
+				{moreUrl: '', sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1479190789.95594557!220x220.jpg', title: '小米盒子3s', price: '299', moreItem: '电视影音'}
       ],
-      hardwarePropagandaData: {
-        sourceUrl: 'http://www.mi.com/scooter/',
-        imgUrl: 'http://i3.mifile.cn/a4/124d82cc-cfce-44ab-b711-28b21be81683'
+      appliancePropagandaData: {
+        sourceUrl: '#',
+        imgUrl: 'https://i1.mifile.cn/a4/xmad_1544580545953_UvEXK.jpg'
       },
       Selected: [],
       styles: {
@@ -332,14 +331,11 @@ export default {
         sourceUrl: '',
         imgUrl: '',
         title: '',
-        desc: '',
-        discountType: '',
-        discount: '',
         price: 0,
         oldPrice: 0,
         sorted: 0,
       },
-      newHardwareData: {
+      newPhoneData: {
         sourceUrl: '',
         imgUrl: ''
       },
@@ -352,8 +348,8 @@ export default {
     },
     changeAD() {
       this.modal1 = true;
-      this.newHardwareData.sourceUrl = this.hardwarePropagandaData.sourceUrl;
-      this.newHardwareData.imgUrl = this.hardwarePropagandaData.imgUrl;
+      this.newPhoneData.sourceUrl = this.appliancePropagandaData.sourceUrl;
+      this.newPhoneData.imgUrl = this.appliancePropagandaData.imgUrl;
     },
     Submit() {
       this.show = false;
@@ -361,7 +357,7 @@ export default {
     },
     ok() {
       this.$Message.success('更换成功！');
-      console.log(this.newHardwareData);
+      console.log(this.newPhoneData);
     },
     cancel() {
       this.$Message.success('取消更换！');
@@ -369,10 +365,10 @@ export default {
     // 获取历史记录信息
     handleListApproveHistory(){
       // 保存取到的所有数据
-      this.ajaxHistoryData = this.hardwareData
-      this.dataCount = this.hardwareData.length;
+      this.ajaxHistoryData = this.applianceData
+      this.dataCount = this.applianceData.length;
       // 初始化显示，小于每页显示条数，全显，大于每页显示条数，取前每页条数显示
-      if(this.hardwareData.length < this.pageSize){
+      if(this.applianceData.length < this.pageSize){
         this.historyData = this.ajaxHistoryData;
       }else{
         this.historyData = this.ajaxHistoryData.slice(0,this.pageSize);
