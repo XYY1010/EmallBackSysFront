@@ -9,7 +9,7 @@
       <Button type="primary" icon="md-refresh" size="large" @click="changeAD">更换左侧宣传广告</Button>
       显示 <InputNumber v-model="pageSize" size="large" @on-change="changePageSize" :min="1" :max="8"></InputNumber> 条
     </div>
-    <Table border ref="selection" :columns="columns" :data="historyData" @on-selection-change="select" no-data-text="手机模块信息空空如也，请添加~~~"></Table>
+    <Table border :columns="columns" :data="historyData" no-data-text="手机模块信息空空如也，请添加~~~"></Table>
     <Page :total="dataCount" :page-size="pageSize" show-total class="paging" @on-change="changepage"></Page>
 
     <Modal
@@ -53,13 +53,13 @@
             </Form>
         </Modal>
 
-    <Drawer
+        <Drawer
             title="修改"
             v-model="show"
             width="720"
             :mask-closable="false"
             :styles="styles"
-        >
+            >
             <Form :model="formData">
                 <Row :gutter="32">
                     <Col span="12">
@@ -89,7 +89,7 @@
                           <InputNumber
                            size="large"
                            :min="0"
-                           v-model="formData.oldPrice===undefine?0:formData.oldPrice"
+                           v-model="formData.oldPrice===undefined?0:formData.oldPrice"
                            :formatter="value => `￥ ${value}`"></InputNumber>
                         </FormItem>
                     </Col>

@@ -9,7 +9,7 @@
       <Button type="primary" icon="md-refresh" size="large" @click="changeAD">更换左侧宣传广告</Button>
       显示 <InputNumber v-model="pageSize" size="large" @on-change="changePageSize" :min="1" :max="8"></InputNumber> 条
     </div>
-    <Table border ref="selection" :columns="columns" :data="historyData" @on-selection-change="select" no-data-text="手机模块信息空空如也，请添加~~~"></Table>
+    <Table border :columns="columns" :data="historyData" no-data-text="配件模块信息空空如也，请添加~~~"></Table>
     <Page :total="dataCount" :page-size="pageSize" show-total class="paging" @on-change="changepage"></Page>
 
     <Modal
@@ -32,7 +32,6 @@
                         </FormItem>
                     </Col>
                 </Row>
-
                 <Row :gutter="32">
                   <Col span="12">
                     <FormItem label="宣传图" label-position="top">
@@ -89,24 +88,8 @@
                           <InputNumber
                            size="large"
                            :min="0"
-                           v-model="formData.oldPrice===undefine?0:formData.oldPrice"
+                           v-model="formData.oldPrice===undefined?0:formData.oldPrice"
                            :formatter="value => `￥ ${value}`"></InputNumber>
-                        </FormItem>
-                    </Col>
-                </Row>
-                <Row :gutter="32">
-                    <Col span="12">
-                        <FormItem label="优惠类型" label-position="top">
-                            <Select v-model="formData.discountType" placeholder="请选择类型">
-                                <Option value="new">新品</Option>
-                                <Option value="discount">折扣</Option>
-                                <Option value="free">免邮</Option>
-                            </Select>
-                        </FormItem>
-                    </Col>
-                    <Col span="12">
-                        <FormItem label="优惠描述" label-position="top">
-                            <Input placeholder="请输入价格描述" v-model="formData.discount"></Input>
                         </FormItem>
                     </Col>
                 </Row>
@@ -195,72 +178,6 @@ export default {
           align: 'center'
         },
         {
-          title: '商品描述',
-          key: 'desc',
-          align: 'center'
-        },
-        {
-          title: '优惠类型',
-          key: 'discountType',
-          align: 'center',
-          render: (h, params) => {
-            if (params.row.discountType === 'new') {
-              return h('div', [
-                h('span', {
-                    attrs: {
-                      style: 'background-color: #83c44e; color: #fff; padding: 5px 5px 5px 5px;'
-                    }
-                }, "新品")
-              ])
-            } else if (params.row.discountType === 'free') {
-              return h('div', [
-                h('span', {
-                    attrs: {
-                      style: 'background-color: #ffac13; color: #fff; padding: 5px 5px 5px 5px;'
-                    }
-                }, "免邮")
-              ])
-            } else if (params.row.discountType === 'discount') {
-              return h('div', [
-                h('span', {
-                    attrs: {
-                      style: 'background-color: #e53935; color: #fff; padding: 5px 5px 5px 5px;'
-                    }
-                }, "折扣")
-              ])
-            }
-          },
-          filters: [
-            {
-              label: '新品',
-              value: 0
-            },
-            {
-              label: '折扣',
-              value: 1
-            },
-            {
-              label: '免邮',
-              value: 2
-            }
-          ],
-          filterMultiple: true,
-          filterMethod (value, row) {
-            if (value === 0) {
-                return row.discountType === 'new';
-            } else if (value === 1) {
-                return row.discountType === 'discount';
-            } else if (value === 2) {
-                return row.discountType === 'free';
-            }
-          }
-        },
-        {
-          title: '优惠描述',
-          key: 'discount',
-          align: 'center'
-        },
-        {
           title: '原价',
           key: 'oldPrice',
           align: 'center'
@@ -275,11 +192,6 @@ export default {
           key: 'sorted',
           align: 'center',
           sortable: true
-        },
-        {
-          title: '模块分类',
-          key: 'type',
-          align: 'center'
         },
         {
           title: '操作',
@@ -299,12 +211,8 @@ export default {
                       this.formData.title = params.row.title;
                       this.formData.sourceUrl = params.row.sourceUrl;
                       this.formData.imgUrl = params.row.imgUrl;
-                      this.formData.desc = params.row.desc;
                       this.formData.price = params.row.price;
-                      this.formData.oldPrice = params.row.oldPrice;
                       this.formData.sorted = params.row.sorted;
-                      this.formData.discount = params.row.discount;
-                      this.formData.discountType = params.row.discountType;
                     }
                   }
               })
@@ -313,22 +221,15 @@ export default {
         }
       ],
       accessoryData: [
-        {sourceUrl: '//item.mi.com/1153300034.html', imgUrl: '//i2.mifile.cn/a1/T1COAjB7WT1RXrhCrK.jpg?width=150&height=150', title: '指环式防滑手机支架', price: '12.5', heat: '8087',
-				reviewDesc: '', reviewAuthor: '', reviewStatus: false},
-				{sourceUrl: '//item.mi.com/1151500039.html', imgUrl: '//i2.mifile.cn/a1/T1_SDgB4KT1RXrhCrK.jpg?width=150&height=150', title: '小米自拍杆', price: '49', heat: '7.6万',
-				reviewDesc: '', reviewAuthor: '', reviewStatus: false},
-				{sourceUrl: '//item.mi.com/1154900023.html', imgUrl: '//i2.mifile.cn/a1/T1l9WjBTbT1RXrhCrK.jpg?width=150&height=150', title: '青米USB快速充电数据线', price: '14.9', heat: '1.4万',
-				reviewDesc: '', reviewAuthor: '', reviewStatus: false},
-				{sourceUrl: '//item.mi.com/1135200036.html', imgUrl: '//i2.mifile.cn/a1/T1zL_vByCT1RXrhCrK.jpg?width=150&height=150', title: '小米随身WIFI', price: '19.9', heat: '29.9万',
-				reviewDesc: '', reviewAuthor: '', reviewStatus: false},
-				{sourceUrl: '//item.mi.com/1154900055.html', imgUrl: '//i2.mifile.cn/a1/T1AmJgBsKT1RXrhCrK.jpg?width=150&height=150', title: '苹果Lightning to USB数据线', price: '39', heat: '1.6万',
-				reviewDesc: '', reviewAuthor: '', reviewStatus: false},
-				{sourceUrl: '//item.mi.com/1162800007.html', imgUrl: '//i2.mifile.cn/a1/pms_1468287589.40786199.jpg?width=150&height=150', title: '米家随身风扇', price: '19.9', heat: '4434',
-				reviewDesc: '', reviewAuthor: '', reviewStatus: false},
-				{sourceUrl: '//item.mi.com/1144900003.html', imgUrl: '//i2.mifile.cn/a1/T1_8YvBKJT1RXrhCrK.jpg?width=150&height=150', title: '功夫米兔手机支架', price: '19', heat: '1.9万',
-				reviewDesc: '', reviewAuthor: '', reviewStatus: false}
+        {id: 1, sourceUrl: '//item.mi.com/1153300034.html', imgUrl: '//i2.mifile.cn/a1/T1COAjB7WT1RXrhCrK.jpg?width=150&height=150', title: '指环式防滑手机支架', price: '12.5', sorted: 1},
+				{id: 2, sourceUrl: '//item.mi.com/1151500039.html', imgUrl: '//i2.mifile.cn/a1/T1_SDgB4KT1RXrhCrK.jpg?width=150&height=150', title: '小米自拍杆', price: '49', sorted: 2},
+				{id: 3, sourceUrl: '//item.mi.com/1154900023.html', imgUrl: '//i2.mifile.cn/a1/T1l9WjBTbT1RXrhCrK.jpg?width=150&height=150', title: '青米USB快速充电数据线', price: '14.9', sorted: 3},
+				{id: 4, sourceUrl: '//item.mi.com/1135200036.html', imgUrl: '//i2.mifile.cn/a1/T1zL_vByCT1RXrhCrK.jpg?width=150&height=150', title: '小米随身WIFI', price: '19.9', sorted: 4},
+				{id: 5, sourceUrl: '//item.mi.com/1154900055.html', imgUrl: '//i2.mifile.cn/a1/T1AmJgBsKT1RXrhCrK.jpg?width=150&height=150', title: '苹果Lightning to USB数据线', price: '39', sorted: 5},
+				{id: 6, sourceUrl: '//item.mi.com/1162800007.html', imgUrl: '//i2.mifile.cn/a1/pms_1468287589.40786199.jpg?width=150&height=150', title: '米家随身风扇', price: '19.9', sorted: 6},
+				{id: 7, sourceUrl: '//item.mi.com/1144900003.html', imgUrl: '//i2.mifile.cn/a1/T1_8YvBKJT1RXrhCrK.jpg?width=150&height=150', title: '功夫米兔手机支架', price: '19', sorted: 7}
       ],
-      phonePropagandaData: {
+      accessoryPropagandaData: {
         sourceUrl: '#',
         imgUrl: 'https://i1.mifile.cn/a4/xmad_1544580545953_UvEXK.jpg'
       },
@@ -343,9 +244,6 @@ export default {
         sourceUrl: '',
         imgUrl: '',
         title: '',
-        desc: '',
-        discountType: '',
-        discount: '',
         price: 0,
         oldPrice: 0,
         sorted: 0,
@@ -363,8 +261,8 @@ export default {
     },
     changeAD() {
       this.modal1 = true;
-      this.newPhoneData.sourceUrl = this.phonePropagandaData.sourceUrl;
-      this.newPhoneData.imgUrl = this.phonePropagandaData.imgUrl;
+      this.newPhoneData.sourceUrl = this.accessoryPropagandaData.sourceUrl;
+      this.newPhoneData.imgUrl = this.accessoryPropagandaData.imgUrl;
     },
     Submit() {
       this.show = false;
@@ -380,10 +278,10 @@ export default {
     // 获取历史记录信息
     handleListApproveHistory(){
       // 保存取到的所有数据
-      this.ajaxHistoryData = this.phoneData
-      this.dataCount = this.phoneData.length;
+      this.ajaxHistoryData = this.accessoryData
+      this.dataCount = this.accessoryData.length;
       // 初始化显示，小于每页显示条数，全显，大于每页显示条数，取前每页条数显示
-      if(this.phoneData.length < this.pageSize){
+      if(this.accessoryData.length < this.pageSize){
         this.historyData = this.ajaxHistoryData;
       }else{
         this.historyData = this.ajaxHistoryData.slice(0,this.pageSize);
