@@ -552,9 +552,10 @@ export default {
       this.rmIndex = -1;
     },
     ok1() {
-      for (var i = 0; i < this.$refs.selection.getSelection().length; i++) {
+      this.Selected = this.$refs.selection.getSelection().splice(0);
+      for (var i = 0; i < this.Selected.length; i++) {
         for (var j = 0; j < this.usersData.length; j++) {
-          if (this.$refs.selection.getSelection()[i].userId === this.usersData[j].userId) {
+          if (this.Selected[i].userId === this.usersData[j].userId) {
             this.usersData.splice(j, 1);
             break;
           }

@@ -345,9 +345,10 @@ export default {
       this.rmIndex = -1;
     },
     ok1() {
-      for (var i = 0; i < this.$refs.selection.getSelection().length; i++) {
+      this.Selected = this.$refs.selection.getSelection().splice(0);
+      for (var i = 0; i < this.Selected.length; i++) {
         for (var j = 0; j < this.orderData.length; j++) {
-          if (this.$refs.selection.getSelection()[i].orderId == this.orderData[j].orderId) {
+          if (this.Selected[i].orderId == this.orderData[j].orderId) {
             this.orderData.splice(j, 1);
             break;
           }
