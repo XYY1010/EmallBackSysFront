@@ -295,6 +295,10 @@ export default {
       ]);
     },
     append (data) {
+      if (data.parent_id != 0) {
+        this.$Message.error("仅支持二级分类");
+        return;
+      }
       this.newAppendData = data;
       this.modalStatus = true;
     },
