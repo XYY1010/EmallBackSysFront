@@ -92,6 +92,7 @@ export default {
         this.$Message.error("仅支持二级分类");
         return;
       }
+      this.parentId = data.id;
       this.newAppendData = data;
       this.modalStatus = true;
     },
@@ -102,9 +103,9 @@ export default {
       }
       this.$axios({
         method:'post',
-        url:'/Category/deleteCategory',
+        url:'/Category/deleteByName',
         params:{
-          catId:node.node.id
+          categoryName: node.node.title
         }
       }).then(res=>{
         this.$Notice.open({
@@ -143,6 +144,9 @@ export default {
             title:"成功",
             desc:res.data.data
           });
+          this.categoryData = [];
+          this.data = [];
+          this.getAllCategory();
           this.parentId='';
       }).catch(error=>{
           this.$Notice.open({
