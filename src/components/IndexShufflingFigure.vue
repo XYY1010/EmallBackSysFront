@@ -327,9 +327,10 @@ export default {
       }
     },
     ok1() {
-      for (var i = 0; i < this.$refs.selection.getSelection().length; i++) {
+      this.Selected = this.$refs.selection.getSelection().splice(0);
+      for (var i = 0; i < this.Selected.length; i++) {
         for (var j = 0; j < this.shufflingFigureData.length; j++) {
-          if ((this.$refs.selection.getSelection())[i].id === this.shufflingFigureData[j].id) {
+          if (this.Selected[i].id === this.shufflingFigureData[j].id) {
             this.shufflingFigureData.splice(j, 1);
             break;
           }

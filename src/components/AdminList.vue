@@ -493,9 +493,10 @@ export default {
       this.rmIndex = -1;
     },
     ok1() {
-      for (var i = 0; i < this.$refs.selection.getSelection().length; i++) {
+      this.Selected = this.$refs.selection.getSelection().splice(0);
+      for (var i = 0; i < this.Selected.length; i++) {
         for (var j = 0; j < this.adminsData.length; j++) {
-          if ((this.$refs.selection.getSelection())[i].adminId === this.adminsData[j].adminId) {
+          if (this.Selected[i].adminId === this.adminsData[j].adminId) {
             this.adminsData.splice(j, 1);
             break;
           }

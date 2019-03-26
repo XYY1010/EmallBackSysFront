@@ -478,9 +478,10 @@ export default {
       }
     },
     ok1() {
-      for (var i = 0; i < this.$refs.selection.getSelection().length; i++) {
+      this.Selected = this.$refs.selection.getSelection().splice(0);
+      for (var i = 0; i < this.Selected.length; i++) {
         for (var j = 0; j < this.navData.length; j++) {
-          if ((this.$refs.selection.getSelection())[i].id === this.navData[j].id) {
+          if (this.Selected[i].id === this.navData[j].id) {
             this.navData.splice(j, 1);
             break;
           }

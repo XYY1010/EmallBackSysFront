@@ -88,14 +88,11 @@ export default {
       ]);
     },
     append (data) {
-      if(data.parent_id!=0&&data.id!=undefined){
-        this.$Notice.open({
-          title:"失败",
-          desc:"该分类是最终分类，不能继续添加"
-        });
-        return ;
-      }
       this.parentId = data.id;
+      if (data.parent_id != 0) {
+        this.$Message.error("仅支持二级分类");
+        return;
+      }
       this.newAppendData = data;
       this.modalStatus = true;
     },
