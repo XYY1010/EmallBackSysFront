@@ -106,7 +106,7 @@
           </Col>
           <Col span="12">
             <FormItem label="上传头像" label-position="top">
-              <Upload multiple ref="upload" :format="['jpg','jpeg','png']" :max-size="2048" :before-upload="handleBeforeUpload" :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize" type="drag" action="//jsonplaceholder.typicode.com/posts/">
+              <Upload  ref="upload" name="upfile" :headers="headers" :on-error="uploadError" :on-success="uploadSuccess" :format="['jpg','jpeg','png']" :max-size="2048" :before-upload="handleBeforeUpload" :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize" type="drag" action="http://localhost:8090/file/uploading">
                   <div style="padding: 20px 0">
                       <Icon type="md-add" size="20"></Icon>
                   </div>
@@ -183,11 +183,12 @@
           </Col>
           <Col span="12">
             <FormItem label="上传头像" label-position="top">
-              <Upload multiple ref="upload" :format="['jpg','jpeg','png']" :max-size="2048" :before-upload="handleBeforeUpload" :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize" type="drag" action="//jsonplaceholder.typicode.com/posts/">
+              <Upload ref="upload" :headers="headers" name="upfile" :on-error="uploadError" :on-success="uploadSuccess" :format="['jpg','jpeg','png']" :max-size="2048" :before-upload="handleBeforeUpload" :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize" type="drag" action="http://localhost:8090/file/uploading">
                   <div style="padding: 20px 0">
                       <Icon type="md-add" size="20"></Icon>
                   </div>
               </Upload>
+              <img src = "/Users/chaikai/Desktop/test/WechatIMG49.jpeg">
             </FormItem>
           </Col>
         </Row>
@@ -213,6 +214,11 @@ export default {
       dataCount:0,
       // 每页显示多少条
       pageSize:10,
+      headers:{
+        'Access-Control-Allow-Methods': 'PUT,POST,GET,DELETE,OPTIONS',
+        'Access-Control-Allow-Origin': '*'
+      },
+      imgshowUrl:'',
       historyData: [],
       loading: false,
       modalStatus: false,
@@ -598,16 +604,17 @@ export default {
     },
     handleBeforeUpload(file) {
         // 创建一个 FileReader 对象
+
         let reader = new FileReader()
         // readAsDataURL 方法用于读取指定 Blob 或 File 的内容
         // 当读操作完成，readyState 变为 DONE，loadend 被触发，此时 result 属性包含数据：URL（以 base64 编码的字符串表示文件的数据）
         // 读取文件作为 URL 可访问地址
-        reader.readAsDataURL(file)
-
         const _this = this
+        reader.readAsDataURL(file);
+        let url;
         reader.onloadend = function (e) {
-            file.url = reader.result;
-            _this.formData.imgUrl = file;
+          url = reader.result;
+          _this.formData.imgUrl = file;
         }
     },
     handleFormatError(file) {
@@ -621,6 +628,13 @@ export default {
         title: '超出文件大小限制',
         desc: '文件 ' + file.name + ' 太大，不能超过 2M。'
       })
+    },
+    uploadSuccess(res,file,fileList){
+      console.log(res.data);
+      this.imgshowUrl = res.data;
+    },
+    uploadError(a,b,c){
+      this.$Message.error(a.data);
     }
   },
   created() {
