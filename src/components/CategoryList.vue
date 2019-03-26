@@ -88,6 +88,7 @@ export default {
       ]);
     },
     append (data) {
+      this.parentId = data.id;
       if (data.nodeKey != 0 && data.parent_id != 0) {
         this.$Message.error("仅支持二级分类");
         return;
