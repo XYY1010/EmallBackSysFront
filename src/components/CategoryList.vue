@@ -88,8 +88,7 @@ export default {
       ]);
     },
     append (data) {
-      this.parentId = data.id;
-      if (data.parent_id != 0) {
+      if (data.nodeKey != 0 && data.parent_id != 0) {
         this.$Message.error("仅支持二级分类");
         return;
       }
@@ -112,13 +111,13 @@ export default {
           title:"成功",
           desc:res.data.data
         });
-        
+
       }).catch(error=>{
         this.$Notice.open({
           title:"失败",
           desc:"删除失败"
         });
-       
+
         return;
       });
       const parentKey = root.find(el => el === node).parent;
