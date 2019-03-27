@@ -92,7 +92,9 @@ export default {
     }
   },
   mounted() {
-    this.userName = this.$store.getters.user.userName;
+    if (this.$store.getters.user != null) {
+      this.userName = this.$store.getters.user.userName;
+    }
   }
 }
 </script>

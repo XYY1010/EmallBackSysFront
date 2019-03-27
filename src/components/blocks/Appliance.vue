@@ -194,6 +194,11 @@ export default {
           align: 'center'
         },
         {
+          title: '商品描述',
+          key: 'desc',
+          align: 'center'
+        },
+        {
           title: '优惠类型',
           key: 'discountType',
           align: 'center',
@@ -288,6 +293,7 @@ export default {
                       this.formData.title = params.row.title;
                       this.formData.sourceUrl = params.row.sourceUrl;
                       this.formData.imgUrl = params.row.imgUrl;
+                      this.formData.desc = params.row.desc;
                       this.formData.price = params.row.price;
                       this.formData.sorted = params.row.sorted;
                       this.formData.discount = params.row.discount;
@@ -300,21 +306,21 @@ export default {
         }
       ],
       applianceData: [
-        {sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1539315570.63599432!220x220.jpg', title: '小米电视4X 43英寸', price: '1399',
+        {sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1539315570.63599432!220x220.jpg', title: '小米电视4X 43英寸', price: 1399,
 				reviewDesc: '电视很好，够清晰，这个价格打特价很划算.', reviewAuthor: '1432693760', reviewStatus: true, discountType: 'new', discount: '新品'},
-				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1510111588.69169839!220x220.jpg', title: '小米电视4 55英寸', price: '3699', oldPrice: '3999', discountType: 'discount', discount: '减300元', desc: '4.9mm 极超薄机身 / 2GB+8GB 大内存空间',
+				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1510111588.69169839!220x220.jpg', title: '小米电视4 55英寸', price: 3699, oldPrice: 3999, discountType: 'discount', discount: '减300元', desc: '4.9mm 极超薄机身 / 2GB+8GB 大内存空间',
 				reviewDesc: '很惊艳，全家人都很喜欢，感觉有点买小了！效果也不错', reviewAuthor: '妳狠重要', reviewStatus: true},
-				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1500287084.72131750!220x220.jpg', title: '小米电视4A 32英寸', price: '899', desc: '64位四核处理器 / 1GB+4GB大内存',
-				reviewDesc: '放在次卧，看着刚好，清晰度能接受，一台红米的这个价格...', reviewAuthor: '▓▓▓▓', reviewStatus: true, discountType: 'discount', discount: '减100元', oldPrice: '999'},
-				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1522318330.86967810!220x220.jpg', title: '小米电视4C 50英寸', price: '1899', desc: '4K HDR / 人工智能语音',
-				reviewDesc: '朋友同事来家都说电视超值，非常棒，花最少的钱，享最好...', reviewAuthor: '煎饼', reviewStatus: true, oldPrice: '39', discountType: 'discount', discount: '减300', oldPrice: '2199'},
-				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1539855763.04646220!220x220.jpg', title: '小米电视4A 58英寸', price: '2499',
+				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1500287084.72131750!220x220.jpg', title: '小米电视4A 32英寸', price: 899, desc: '64位四核处理器 / 1GB+4GB大内存',
+				reviewDesc: '放在次卧，看着刚好，清晰度能接受，一台红米的这个价格...', reviewAuthor: '▓▓▓▓', reviewStatus: true, discountType: 'discount', discount: '减100元', oldPrice: 999},
+				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1522318330.86967810!220x220.jpg', title: '小米电视4C 50英寸', price: 1899, desc: '4K HDR / 人工智能语音',
+				reviewDesc: '朋友同事来家都说电视超值，非常棒，花最少的钱，享最好...', reviewAuthor: '煎饼', reviewStatus: true, oldPrice: 39, discountType: 'discount', discount: '减300', oldPrice: 2199},
+				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1539855763.04646220!220x220.jpg', title: '小米电视4A 58英寸', price: 2499,
 				reviewDesc: '电视非常大，智能语言遥控，画面清析，效果好，这是第二...', reviewAuthor: '大民', reviewStatus: true, discountType: 'new', discount:'新品'},
-				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1540366231.87578189!220x220.jpg', title: '小米电视4 65英寸全面屏旗舰版', price: '5999',
+				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1540366231.87578189!220x220.jpg', title: '小米电视4 65英寸全面屏旗舰版', price: 5999,
 				reviewDesc: '电视非常好，大气，非常清楚。我是相信小米，希望小米的...', reviewAuthor: '2171033765', reviewStatus: true, discountType: 'new', discount: '新品'},
-				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1499072633.96298268!220x220.jpg', title: '小米盒子3 增强版', price: '399', desc: '高端 4K 网络机顶盒',
-				reviewDesc: '小米盒子3增强版外观精致，设计精巧，运行速度很快，操...', reviewAuthor: 'jin', reviewStatus: true, oldPrice: '449', discountType: 'discount', discount: '减50元'},
-				{moreUrl: '', sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1479190789.95594557!220x220.jpg', title: '小米盒子3s', price: '299', moreItem: '电视影音'}
+				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1499072633.96298268!220x220.jpg', title: '小米盒子3 增强版', price: 399, desc: '高端 4K 网络机顶盒',
+				reviewDesc: '小米盒子3增强版外观精致，设计精巧，运行速度很快，操...', reviewAuthor: 'jin', reviewStatus: true, oldPrice: 449, discountType: 'discount', discount: '减50元'},
+				{moreUrl: '', sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1479190789.95594557!220x220.jpg', title: '小米盒子3s', price: 299, moreItem: '电视影音'}
       ],
       appliancePropagandaData: {
         sourceUrl: '#',
@@ -331,6 +337,9 @@ export default {
         sourceUrl: '',
         imgUrl: '',
         title: '',
+        desc: '',
+        discountType: '',
+        discount: '',
         price: 0,
         oldPrice: 0,
         sorted: 0,
