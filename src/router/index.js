@@ -13,21 +13,37 @@ export default new Router({
     {
       path: '/index-content',
       name: 'index-content',
+      meta: {
+          // 添加该字段，表示进入这个路由是需要登录的
+          requireAuth: true,
+      },
       component: resolve => require(['@/pages/index'], resolve),
       children: [
         {
             path: 'index-nav',
             name: 'index-nav',
+            meta: {
+                // 添加该字段，表示进入这个路由是需要登录的
+                requireAuth: true,
+            },
             component: resolve => require(['@/components/IndexNav'], resolve)
         },
         {
             path: 'index-shuffling-figures',
             name: 'index-shuffling-figures',
+            meta: {
+                // 添加该字段，表示进入这个路由是需要登录的
+                requireAuth: true,
+            },
             component: resolve => require(['@/components/IndexShufflingFigure'], resolve)
         },
         {
             path: 'index-block',
             name: 'index-block',
+            meta: {
+                // 添加该字段，表示进入这个路由是需要登录的
+                requireAuth: true,
+            },
             component: resolve => require(['@/components/IndexBlock'], resolve)
         }
       ]
@@ -35,16 +51,28 @@ export default new Router({
     {
       path: '/goods-management',
       name: 'goods-management',
+      meta: {
+          // 添加该字段，表示进入这个路由是需要登录的
+          requireAuth: true,
+      },
       component: resolve => require(['@/pages/index'], resolve),
       children: [
         {
             path: 'category-list',
             name: 'category-list',
+            meta: {
+                // 添加该字段，表示进入这个路由是需要登录的
+                requireAuth: true,
+            },
             component: resolve => require(['@/components/CategoryList'], resolve)
         },
         {
             path: 'goods-list',
             name: 'goods-list',
+            meta: {
+                // 添加该字段，表示进入这个路由是需要登录的
+                requireAuth: true,
+            },
             component: resolve => require(['@/components/GoodsList'], resolve)
         }
       ]
@@ -52,11 +80,19 @@ export default new Router({
     {
       path: '/order-management',
       name: 'order-management',
+      meta: {
+          // 添加该字段，表示进入这个路由是需要登录的
+          requireAuth: true,
+      },
       component: resolve => require(['@/pages/index'], resolve),
       children: [
         {
             path: 'order-list',
             name: 'order-list',
+            meta: {
+                // 添加该字段，表示进入这个路由是需要登录的
+                requireAuth: true,
+            },
             component: resolve => require(['@/components/OrderList'], resolve)
         }
       ]
@@ -64,11 +100,19 @@ export default new Router({
     {
       path: '/comment-management',
       name: 'comment-management',
+      meta: {
+          // 添加该字段，表示进入这个路由是需要登录的
+          requireAuth: true,
+      },
       component: resolve => require(['@/pages/index'], resolve),
       children: [
         {
             path: 'comment-list',
             name: 'comment-list',
+            meta: {
+                // 添加该字段，表示进入这个路由是需要登录的
+                requireAuth: true,
+            },
             component: resolve => require(['@/components/CommentList'], resolve)
         }
       ]
@@ -76,11 +120,19 @@ export default new Router({
     {
       path: '/user-management',
       name: 'user-management',
+      meta: {
+          // 添加该字段，表示进入这个路由是需要登录的
+          requireAuth: true,
+      },
       component: resolve => require(['@/pages/index'], resolve),
       children: [
         {
             path: 'user-list',
             name: 'user-list',
+            meta: {
+                // 添加该字段，表示进入这个路由是需要登录的
+                requireAuth: true,
+            },
             component: resolve => require(['@/components/UserList'], resolve)
         }
       ]
@@ -88,11 +140,19 @@ export default new Router({
     {
       path: '/admin-management',
       name: 'admin-management',
+      meta: {
+          // 添加该字段，表示进入这个路由是需要登录的
+          requireAuth: true,
+      },
       component: resolve => require(['@/pages/index'], resolve),
       children: [
         {
             path: 'admin-list',
             name: 'admin-list',
+            meta: {
+                // 添加该字段，表示进入这个路由是需要登录的
+                requireAuth: true,
+            },
             component: resolve => require(['@/components/AdminList'], resolve)
         }
       ]
@@ -100,11 +160,19 @@ export default new Router({
     {
       path: '/statistics',
       name: 'statistics',
+      meta: {
+          // 添加该字段，表示进入这个路由是需要登录的
+          requireAuth: true,
+      },
       component: resolve => require(['@/pages/index'], resolve),
       children: [
         {
             path: 'sales-statistics',
             name: 'sales-statistics',
+            meta: {
+                // 添加该字段，表示进入这个路由是需要登录的
+                requireAuth: true,
+            },
             component: resolve => require(['@/components/Statistics'], resolve)
         }
       ]

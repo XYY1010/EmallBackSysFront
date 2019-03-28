@@ -1,12 +1,5 @@
 const state = {
-  user: {
-    userId: '',
-    userName: '',
-    password: '',
-    phone: '',
-    address: '',
-    email: ''
-  }
+  user: {}
 }
 
 const getters = {
