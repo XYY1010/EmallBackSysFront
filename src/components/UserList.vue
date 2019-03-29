@@ -7,9 +7,17 @@
     </Alert>
     <div class="searchDiv">
       <span>
-        <Input placeholder="输入要查询的用户名" style="width:300px; margin: 0px 10px 0px 0px" size="large"></Input>
-        <Button type="primary" shape="circle" icon="ios-search" size="large">搜用户</Button>
-        <Button type="error" shape="circle" icon="md-close" size="large">取消检索</Button>
+        <Input placeholder="输入要查询的用户名" style="width:300px; margin: 0px 10px 0px 0px" size="large"
+        v-model="searchData"></Input>
+        <Button type="primary" shape="circle" 
+          icon="ios-search" 
+          size="large"
+          @click="confirmSearch">搜用户</Button>
+        <Button type="error" 
+          shape="circle" 
+          icon="md-close" 
+          size="large"
+          @click="cancelSearch">取消检索</Button>
       </span>
     </div>
     <div class="operationDiv">
@@ -106,7 +114,7 @@
           </Col>
           <Col span="12">
             <FormItem label="上传头像" label-position="top">
-              <Upload  ref="upload" name="upfile" :headers="headers" :on-error="uploadError" :on-success="uploadSuccess" :format="['jpg','jpeg','png']" :max-size="2048" :before-upload="handleBeforeUpload" :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize" type="drag" action="http://localhost:8090/file/uploading">
+              <Upload  ref="upload" name="upfile" :headers="headers" :on-error="uploadError" :on-success="addUploadSuccess" :format="['jpg','jpeg','png']" :max-size="2048" :before-upload="handleBeforeUpload" :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize" type="drag" action="http://localhost:8090/file/uploading">
                   <div style="padding: 20px 0">
                       <Icon type="md-add" size="20"></Icon>
                   </div>
@@ -114,6 +122,9 @@
             </FormItem>
           </Col>
         </Row>
+        <div class="figureImg">
+          <img :src="newUserData.avatarUrl" width="100%" height="100%">
+        </div>
       </Form>
     </Modal>
 
@@ -123,7 +134,7 @@
       width="330"
       :mask-closable="false"
       :styles="styles">
-      <Form ref="formData" :model="formData" :rules="ruleUserData">
+      <Form ref="formData" :model="formData" :rules="ruleUserData1">
         <Row :gutter="32">
           <Col span="12">
             <FormItem label="用户名" prop="userName" label-position="top">
@@ -183,15 +194,17 @@
           </Col>
           <Col span="12">
             <FormItem label="上传头像" label-position="top">
-              <Upload ref="upload" :headers="headers" name="upfile" :on-error="uploadError" :on-success="uploadSuccess" :format="['jpg','jpeg','png']" :max-size="2048" :before-upload="handleBeforeUpload" :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize" type="drag" action="http://localhost:8090/file/uploading">
+              <Upload ref="upload" :headers="headers" name="upfile" :on-error="uploadError" :on-success="modifyUploadSuccess" :format="['jpg','jpeg','png']" :max-size="2048" :before-upload="handleBeforeUpload" :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize" type="drag" action="http://localhost:8090/file/uploading">
                   <div style="padding: 20px 0">
                       <Icon type="md-add" size="20"></Icon>
                   </div>
               </Upload>
-              <img src = "/Users/chaikai/Desktop/test/WechatIMG49.jpeg">
             </FormItem>
           </Col>
         </Row>
+        <div class="figureImg">
+          <img :src="formData.avatarUrl" width="100%" height="100%">
+        </div>
       </Form>
       <div class="drawer-footer">
         <Button style="margin-right: 8px" @click="show = false">取消</Button>
@@ -214,11 +227,12 @@ export default {
       dataCount:0,
       // 每页显示多少条
       pageSize:10,
+      searchData:'',
       headers:{
         'Access-Control-Allow-Methods': 'PUT,POST,GET,DELETE,OPTIONS',
         'Access-Control-Allow-Origin': '*'
       },
-      imgshowUrl:'',
+      imgshowUrl:'https://raw.githubusercontent.com/XYY1010/WebImgSrc/master/test/3.jpg',
       historyData: [],
       loading: false,
       modalStatus: false,
@@ -360,6 +374,8 @@ export default {
                   on: {
                     click: () => {
                       this.show = true;
+                      this.loadAddress();
+                      this.formData.userId = params.row.userId;
                       this.formData.userName = params.row.userName;
                       this.formData.phone = params.row.phone;
                       this.formData.address = params.row.address;
@@ -387,11 +403,9 @@ export default {
           }
         }
       ],
-      usersData: [
-        {userId: '42346568078196736', userName: '李大大', phone: '17845897418', gender: '男', address: ['浙江省', '宁波市', '鄞州区'], email: 'zsvip@163.com', avatarUrl: 'https://raw.githubusercontent.com/XYY1010/WebImgSrc/master/test/3.jpg', birthday: '1970-10-10', hometown: ['浙江省', '宁波市', '鄞州区']},
-        {userId: '42346568078196224', userName: 'dsds', phone: '17845895566', gender: '女', address: ['浙江省', '宁波市', '北仑区'], email: '5dvip@163.com', avatarUrl: 'https://raw.githubusercontent.com/XYY1010/WebImgSrc/master/test/5.jpg', birthday: '1970-10-10', hometown: ['浙江省', '宁波市', '鄞州区']}
-      ],
+      usersData: [],
       newUserData: {
+        userId:'',
         userName: '',
         password: '',
         password2: '',
@@ -399,11 +413,12 @@ export default {
         phone: '',
         gender: '',
         address: [],
-        avatarUrl: '',
+        avatarUrl: 'https://raw.githubusercontent.com/XYY1010/WebImgSrc/master/test/3.jpg',
         birthday: '',
         hometown: []
       },
       formData: {
+        userId:'',
         userName: '',
         password: '',
         password2: '',
@@ -416,6 +431,7 @@ export default {
         hometown: []
       },
       Selected: [],
+      userIdSelected:'',
       ruleUserData: {
         userName: [
           { required: true, message: '用户名不能为空', trigger: 'blur' }
@@ -436,6 +452,26 @@ export default {
           { validator: this.checkPhone }
         ]
       },
+      ruleUserData1: {
+        userName: [
+          { required: true, message: '用户名不能为空', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '密码不能为空', trigger: 'blur' }
+        ],
+        password2: [
+          { required: true, message: '密码不能为空', trigger: 'blur' },
+          { validator: this.checkConfirmPassword1 }
+        ],
+        email: [
+          { required: true, message: '邮箱地址不能为空', trigger: 'blur' },
+          { validator: this.checkEmail }
+        ],
+        phone: [
+          { required: true, message: '手机号不能为空', trigger: 'blur' },
+          { validator: this.checkPhone }
+        ]
+      },
       styles: {
         height: 'calc(100% - 55px)',
         overflow: 'auto',
@@ -445,12 +481,105 @@ export default {
     }
   },
   methods: {
+    getAllUser(){
+      this.$axios({
+        method:'get',
+        url:'user/getAllUser'
+      }).then(res=>{
+        this.usersData = res.data.data;
+        for(var i=0; i<this.usersData.length; i++) {
+          this.usersData[i].birthday = this.dateUtil(this.usersData[i].birthday);
+        }
+        this.handleListApproveHistory();
+      }).catch(error=>{
+        this.$Message.error("服务器错误,获得用户信息失败");
+      });
+    },
+    deleteUser(idGroup){
+      this.$axios({
+        method:'get',
+        url:'user/deleteUsers',
+        params:{
+          idGroup:idGroup
+        }
+      }).then(res=>{
+        this.modalStatus1 = true;
+      }).catch(error=>{
+        this.$Message.error("服务器错误,删除用户出错");
+      });
+    },
+    modifyUser(){
+      var params = new URLSearchParams();
+      params.append('userId', this.formData.userId);
+      params.append('userName', this.formData.userName);  
+      params.append('password', this.formData.password);
+      params.append('address', this.formData.address);
+      params.append('email', this.formData.email);      
+      params.append('phone', this.formData.phone);
+      params.append('gender',this.formData.gender);
+      params.append('avatarUrl', this.formData.avatarUrl);
+      params.append('hometown', this.formData.hometown);      
+      params.append('birthday', this.formData.birthday);
+      this.$axios({
+        method:'post',
+        url:'/user/modifyUser',
+        headers:{
+          'Content-Type' : 'application/x-www-form-urlencoded;charset=UTF-8',
+          'Access-Control-Allow-Methods': 'PUT,POST,GET,DELETE,OPTIONS',
+          'Access-Control-Allow-Origin': '*'
+        },
+        data:params
+      }).then(res=>{
+        this.$Message.success('修改成功！');
+        this.handleListApproveHistory();
+      }).catch(error=>{
+        this.$Message.error(error);
+      });
+    },
+    dateUtil(originDate){
+      var date = new Date(+new Date(originDate)+8*3600*1000).toISOString().replace(/T/g,' ').replace(/\.[\d]{3}Z/,'');
+      return date.split(" ")[0];
+    },
+    axiosAddUser(){
+      var params = new URLSearchParams();
+      params.append('userName', this.newUserData.userName);  
+      params.append('password', this.newUserData.password);
+      params.append('address', this.newUserData.address);
+      params.append('email', this.newUserData.email);      
+      params.append('phone', this.newUserData.phone);
+      params.append('gender',this.newUserData.gender);
+      params.append('avatarUrl', this.newUserData.avatarUrl);
+      params.append('hometown', this.newUserData.hometown);      
+      params.append('birthday', this.newUserData.birthday);
+      this.$axios({
+        method:'post',
+        url:'/user/addUser',
+        headers:{
+          'Content-Type' : 'application/x-www-form-urlencoded;charset=UTF-8',
+          'Access-Control-Allow-Methods': 'PUT,POST,GET,DELETE,OPTIONS',
+          'Access-Control-Allow-Origin': '*'
+        },
+        data:params
+      }).then(res=>{
+        this.$Message.success('添加成功！');
+        this.newUserData.userId = res.data.data;
+        this.usersData.push(this.newUserData);
+        this.handleListApproveHistory();
+      }).catch(error=>{
+        this.$Message.error(error);
+      });
+    },
+    loadAddress(){
+      if(this.address.length==0){
+        setTimeout(() => {
+          var addressData = require('../db/generateAddressData');
+          this.address = addressData.default.address;
+        }, 500);
+      }
+    },
     addUser() {
+      this.loadAddress();
       this.modalStatus2 = true;
-      setTimeout(() => {
-        var addressData = require('../db/generateAddressData');
-        this.address = addressData.default.address;
-      }, 5);
     },
     changePageSize(size) {
       this.pageSize = size;
@@ -461,6 +590,17 @@ export default {
         callback('请再次输入密码');
       } else {
         if (value === this.newUserData.password) {
+          callback();
+        } else {
+          callback('密码不一致');
+        }
+      }
+    },
+    checkConfirmPassword1(rule, value, callback) {
+      if (typeof (value) == undefined) {
+        callback('请再次输入密码');
+      } else {
+        if (value === this.formData.password) {
           callback();
         } else {
           callback('密码不一致');
@@ -491,12 +631,12 @@ export default {
       this.$refs[e].validate((valid) => {
         if (valid) {
         this.show = false;
-        console.log(this.formData);
+        this.modifyUser();
         this.handleListApproveHistory();
         this.$Message.success('添加成功！');
           // 后台数据更新
         } else {
-          this.$Message.error('添加失败!');
+          this.$Message.error('修改失败!');
         }
       });
     },
@@ -524,9 +664,13 @@ export default {
     batchDelete() {
       if (this.$refs.selection.getSelection().length === 0) {
         this.$Message.error('未选中批量数据！！！');
-      } else {
-        this.modalStatus1 = true;
+        return;
       }
+      this.userIdSelected = this.Selected[0].userId;
+      for(var i = 1; i < this.Selected.length; i++){
+        this.userIdSelected += "," + this.Selected[i].userId;
+      }
+      this.deleteUser(this.userIdSelected);
     },
     remove(index) {
       this.usersData.splice(index, 1);// 保存取到的所有数据
@@ -589,11 +733,7 @@ export default {
     ok2(e) {
       this.$refs[e].validate((valid) => {
         if (valid) {
-        console.log(this.newUserData);
-        this.usersData.push(this.newUserData);
-        this.handleListApproveHistory();
-        this.$Message.success('添加成功！');
-          // 后台数据更新
+          this.axiosAddUser();
         } else {
           this.$Message.error('添加失败!');
         }
@@ -617,6 +757,22 @@ export default {
           _this.formData.imgUrl = file;
         }
     },
+    isEqualSearchData(element){
+      var reg = new RegExp(this.searchData);
+      return element.userName.match(reg);
+    },
+    confirmSearch(){
+      this.ajaxHistoryData = this.usersData.filter(this.isEqualSearchData);
+      if(this.ajaxHistoryData.length < this.pageSize){
+        this.historyData = this.ajaxHistoryData;
+      }else{
+        this.historyData = this.ajaxHistoryData.slice(0,this.pageSize);
+      }
+    },
+    cancelSearch(){
+      this.handleListApproveHistory();
+      this.searchData = '';
+    },
     handleFormatError(file) {
       this.$Notice.warning({
         title: '文件格式不正确',
@@ -629,16 +785,22 @@ export default {
         desc: '文件 ' + file.name + ' 太大，不能超过 2M。'
       })
     },
-    uploadSuccess(res,file,fileList){
-      console.log(res.data);
-      this.imgshowUrl = res.data;
+    addUploadSuccess(res,file,fileList){
+      this.$Message.success("上传成功");
+      this.newUserData.avatarUrl = res.data;
+      alert(this.newUserData.avatarUrl);
+    },
+    modifyUploadSuccess(res,file,fileList){
+      this.$Message.success("上传成功");
+      this.formData.avatarUrl = res.data;
+      alert(this.formData.avatarUrl);
     },
     uploadError(a,b,c){
       this.$Message.error(a.data);
     }
   },
   created() {
-    this.handleListApproveHistory();
+    this.getAllUser();
   }
 }
 </script>
@@ -672,5 +834,9 @@ export default {
 }
 .demo-spin-icon-load{
   animation: ani-demo-spin 1s linear infinite;
+}
+.figureImg{
+  width:100%;
+  height:width;
 }
 </style>

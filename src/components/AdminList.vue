@@ -88,7 +88,7 @@
       width="330"
       :mask-closable="false"
       :styles="styles">
-      <Form ref="formData" :model="formData" :rules="ruleAdminData">
+      <Form ref="formData" :model="formData" :rules="ruleAdminData1">
         <Row :gutter="32">
           <Col span="12">
             <FormItem label="登录名" prop="userName" label-position="top">
@@ -131,9 +131,9 @@
         <Row :gutter="32">
           <Col span="12">
             <FormItem label="启用状态" label-position="top">
-              <Select v-model="formData.isUsed" placeholder="请选择启用状态">
-                  <Option value="true">启用</Option>
-                  <Option value="false">禁用</Option>
+              <Select v-model="formData.used" placeholder="请选择启用状态">
+                  <Option value=true>启用</Option>
+                  <Option value=false>禁用</Option>
               </Select>
             </FormItem>
           </Col>
@@ -216,7 +216,7 @@ export default {
           key:'gender',
           align: 'center',
           render: (h, params) => {
-            if (params.row.gender === '男') {
+            if (params.row.gender === "男") {
               return h('div', [
                 h('Icon', {
                   attrs: {
@@ -226,7 +226,7 @@ export default {
                   }
                 })
               ]);
-            } else if (params.row.gender === '女') {
+            } else if (params.row.gender === "女") {
               return h('div', [
                 h('Icon', {
                   attrs: {
@@ -251,10 +251,10 @@ export default {
         },
         {
           title: '是否已启用',
-          key:'isUsed',
+          key:'used',
           align: 'center',
           render: (h, params) => {
-            if (params.row.isUsed == "true") {
+            if (params.row.used == true) {
               return h('div', [
                 h('span', {
                     attrs: {
@@ -285,9 +285,9 @@ export default {
           filterMultiple: true,
           filterMethod (value, row) {
             if (value === 0) {
-                return row.isUsed === true;
+                return row.used === true;
             } else if (value === 1) {
-                return row.isUsed === false;
+                return row.used === false;
             }
           }
         },
@@ -310,7 +310,7 @@ export default {
                       this.formData.address = params.row.address;
                       this.formData.email = params.row.email;
                       this.formData.gender = params.row.gender;
-                      this.formData.isUsed = params.row.isUsed;
+                      this.formData.used = params.row.used;
                     }
                   }
               }),
@@ -330,29 +330,28 @@ export default {
           }
         }
       ],
-      adminsData: [
-        {adminId: 1, adminName: 'admin', phone: '17845897418', gender: '男', email: 'zsvip@163.com', createdDate: '1970-10-10', updatedDate: '1970-10-10', isUsed: "true"},
-        {adminId: 2, adminName: 'test', phone: '17845895566', gender: '女', email: '5dvip@163.com', createdDate: '1970-10-10', updatedDate: '1970-10-10', isUsed: "true"}
-      ],
+      adminsData: [],
       newAdminData: {
+        adminId:'',
         adminName: '',
         password: '',
         password2: '',
         email: '',
         phone: '',
         gender: '',
-        isUsed: "true",
+        used: "true",
         createdDate: '',
         updatedDate: ''
       },
       formData: {
+        adminId:'',
         adminName: '',
         password: '',
         password2: '',
         email: '',
         phone: '',
         gender: '',
-        isUsed: "true",
+        used: "true",
         createdDate: '',
         updatedDate: ''
       },
@@ -377,6 +376,26 @@ export default {
           { validator: this.checkPhone }
         ]
       },
+      ruleAdminData1: {
+        adminName: [
+          { required: true, message: '用户名不能为空', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '密码不能为空', trigger: 'blur' }
+        ],
+        password2: [
+          { required: true, message: '密码不能为空', trigger: 'blur' },
+          { validator: this.checkConfirmPassword1 }
+        ],
+        email: [
+          { required: true, message: '邮箱地址不能为空', trigger: 'blur' },
+          { validator: this.checkEmail }
+        ],
+        phone: [
+          { required: true, message: '手机号不能为空', trigger: 'blur' },
+          { validator: this.checkPhone }
+        ]
+      },
       styles: {
         height: 'calc(100% - 55px)',
         overflow: 'auto',
@@ -386,6 +405,86 @@ export default {
     }
   },
   methods: {
+    getAllAdmin(){
+      this.$axios({
+        method:'get',
+        url:'/admin/getAll'
+      }).then(res=>{
+        this.adminsData = res.data.data;
+        console.log(this.adminsData);
+        for(var i = 0; i < this.adminsData.length; i++){
+          this.adminsData[i].createdDate = this.dateUtil(this.adminsData[i].createdDate);
+          this.adminsData[i].updatedDate = this.dateUtil(this.adminsData[i].updatedDate);
+        }
+        this.handleListApproveHistory();
+      }).catch(error=>{
+        this.$Message.error("服务器错误,获得列表失败");
+      });
+    },
+    addAdmin(){
+      var params = new URLSearchParams();
+      params.append('adminName', this.newAdminData.adminName);
+      params.append('password', this.newAdminData.password);
+      params.append('email', this.newAdminData.email);
+      params.append('phone', this.newAdminData.phone);
+      params.append('gender', this.newAdminData.gender);
+      this.$axios({
+        method:'post',
+        url:'/admin/addAdmin',
+        data:params
+      }).then(res=>{
+        var data = res.data.data;
+        this.newAdminData.adminId = data.adminId;
+        this.newAdminData.createdDate = data.createdDate;
+        this.newAdminData.updatedDate = data.updatedDate;
+        this.newAdminData.used = true;
+        this.adminsData.push(this.newAdminData);
+        this.handleListApproveHistory();
+        this.$Message.success('添加成功！');
+          // 后台数据更新
+      }).catch(error=>{
+        this.$Message.error(error);
+      });
+    },
+    deleteAdmin(idGroup){
+      this.$axios({
+        method:'get',
+        url:'/admin/deleteAdmin',
+        params:{
+          idGroup:idGroup
+        }
+      }).then(res=>{
+        this.Selected =this.$refs.selection.getSelection().splice(0);
+        for (var i = 0; i < this.Selected.length; i++) {
+          for (var j = 0; j < this.adminsData.length; j++) {
+            if (this.Selected[i].adminId === this.adminsData[j].adminId) {
+              this.adminsData.splice(j, 1);
+              break;
+            }
+          }
+        }
+        this.ajaxHistoryData = this.adminsData;
+        this.dataCount = this.adminsData.length;
+        // 初始化显示，小于每页显示条数，全显，大于每页显示条数，取前每页条数显示
+        if(this.adminsData.length < this.curPage * this.pageSize){
+          this.historyData = this.ajaxHistoryData.slice((this.curPage-1)*this.pageSize, this.adminsData.length);
+          if (this.adminsData.length === (this.curPage-1)*this.pageSize) {
+            this.curPage--;
+            this.historyData = this.ajaxHistoryData.slice((this.curPage-1)*this.pageSize, this.adminsData.length);
+          }
+        }
+        else if (this.adminsData.length > this.curPage * this.pageSize) {
+          this.historyData = this.ajaxHistoryData.slice((this.curPage-1)*this.pageSize, this.curPage * this.pageSize);
+        }
+        this.$Message.success('批量移除成功！'); 
+      }).catch(error=>{
+        this.$Message.error(error);
+      });
+    },
+    dateUtil(originDate){
+      var date = new Date(+new Date(originDate)+8*3600*1000).toISOString().replace(/T/g,' ').replace(/\.[\d]{3}Z/,'');
+      return date.split(" ")[0];
+    },
     changePageSize(size) {
       this.pageSize = size;
       this.handleListApproveHistory();
@@ -395,6 +494,17 @@ export default {
         callback('请再次输入密码');
       } else {
         if (value === this.newAdminData.password) {
+          callback();
+        } else {
+          callback('密码不一致');
+        }
+      }
+    },
+    checkConfirmPassword1(rule, value, callback) {
+      if (typeof (value) == undefined) {
+        callback('请再次输入密码');
+      } else {
+        if (value === this.formData.password) {
           callback();
         } else {
           callback('密码不一致');
@@ -425,7 +535,6 @@ export default {
       this.$refs[e].validate((valid) => {
         if (valid) {
         this.show = false;
-        console.log(this.formData);
         this.handleListApproveHistory();
         this.$Message.success('添加成功！');
           // 后台数据更新
@@ -493,42 +602,19 @@ export default {
       this.rmIndex = -1;
     },
     ok1() {
-      this.Selected = this.$refs.selection.getSelection().splice(0);
-      for (var i = 0; i < this.Selected.length; i++) {
-        for (var j = 0; j < this.adminsData.length; j++) {
-          if (this.Selected[i].adminId === this.adminsData[j].adminId) {
-            this.adminsData.splice(j, 1);
-            break;
-          }
-        }
+      var indexSelected = this.Selected[0].adminId;
+      for(var i = 1; i < this.Selected.length; i++){
+        indexSelected += ","+this.Selected[i].adminId;
       }
-      this.ajaxHistoryData = this.adminsData;
-      this.dataCount = this.adminsData.length;
-      // 初始化显示，小于每页显示条数，全显，大于每页显示条数，取前每页条数显示
-      if(this.adminsData.length < this.curPage * this.pageSize){
-        this.historyData = this.ajaxHistoryData.slice((this.curPage-1)*this.pageSize, this.adminsData.length);
-        if (this.adminsData.length === (this.curPage-1)*this.pageSize) {
-          this.curPage--;
-          this.historyData = this.ajaxHistoryData.slice((this.curPage-1)*this.pageSize, this.adminsData.length);
-        }
-      }
-      else if (this.adminsData.length > this.curPage * this.pageSize) {
-        this.historyData = this.ajaxHistoryData.slice((this.curPage-1)*this.pageSize, this.curPage * this.pageSize);
-      }
-      this.$Message.success('批量移除成功！');
-        // 后台数据更新
-      },
+      this.deleteAdmin(indexSelected);
+    },
     cancel1() {
       this.$Message.success('取消移除！');
     },
     ok2(e) {
       this.$refs[e].validate((valid) => {
         if (valid) {
-        console.log(this.newAdminData);
-        this.adminsData.push(this.newAdminData);
-        this.handleListApproveHistory();
-        this.$Message.success('添加成功！');
-          // 后台数据更新
+          this.addAdmin();
         } else {
           this.$Message.error('添加失败!');
         }
@@ -539,7 +625,7 @@ export default {
     }
   },
   created() {
-    this.handleListApproveHistory();
+    this.getAllAdmin();
   }
 }
 </script>
