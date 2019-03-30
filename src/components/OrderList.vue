@@ -7,9 +7,18 @@
     </Alert>
     <div class="searchDiv">
       <span>
-        <Input placeholder="输入要查询的订单ID" style="width:300px; margin: 0px 10px 0px 0px" size="large"></Input>
-        <Button type="primary" shape="circle" icon="ios-search" size="large">搜订单</Button>
-        <Button type="error" shape="circle" icon="md-close" size="large">取消检索</Button>
+        <Input placeholder="输入要查询的订单ID" 
+        style="width:300px; margin: 0px 10px 0px 0px" size="large"
+        v-model="searchData"></Input>
+        <Button type="primary" shape="circle" 
+        icon="ios-search" 
+        size="large" 
+        @click="confirmSearch">搜订单</Button>
+        <Button type="error" 
+        shape="circle"
+        icon="md-close"
+        size="large"
+        @click="cancelSearch">取消检索</Button>
       </span>
     </div>
     <div class="operationDiv">
@@ -75,6 +84,7 @@ export default {
       ajaxHistoryData:[],
       // 初始化信息总条数
       dataCount:0,
+      searchData:'',
       // 每页显示多少条
       pageSize:10,
       historyData: [],
@@ -87,28 +97,6 @@ export default {
       show: false,
       curPage: 1,
       orderData: [
-        {
-            orderId: '1552717032322132',
-            payment: '120',
-            userName: '李大大',
-            remark: '',
-            createdDate: '2019-1-16 14:22',
-            paymentDate: '',
-            closeDate: '',
-            endDate: '',
-            orderStatus: 0
-        },
-        {
-            orderId: '155271703406154',
-            payment: '120',
-            userName: '李大大',
-            remark: '',
-            createdDate: '2019-3-16 14:22',
-            paymentDate: '',
-            closeDate: '',
-            endDate: '',
-            orderStatus: 0
-        }
       ],
       Selected: [],
       columns: [
@@ -153,12 +141,12 @@ export default {
         },
         {
           title: '关闭时间',
-          key:'closeDate',
+          key:'endDate',
           align: 'center'
         },
         {
           title: '完成时间',
-          key:'endDate',
+          key:'closeDate',
           align: 'center'
         },
         {
@@ -170,7 +158,7 @@ export default {
               return h('div', [
                 h('span', {
                     attrs: {
-                      style: 'background-color: #83c44e; color: #fff; padding: 5px 5px 5px 5px;'
+                      style: 'background-color: #e53935; color: #fff; padding: 5px 5px 5px 5px;'
                     }
                 }, "已取消")
               ]);
@@ -178,19 +166,35 @@ export default {
               return h('div', [
                 h('span', {
                     attrs: {
-                      style: 'background-color: #83c44e; color: #fff; padding: 5px 5px 5px 5px;'
+                      style: 'background-color: #43CD80; color: #fff; padding: 5px 5px 5px 5px;'
                     }
                 }, "待支付")
               ]);
-            } else {
+            } else if (params.row.orderStatus == 2) {
               return h('div', [
                 h('span', {
                     attrs: {
-                      style: 'background-color: #e53935; color: #fff; padding: 5px 5px 5px 5px;'
+                      style: 'background-color: #C0FF3E; color: #fff; padding: 5px 5px 5px 5px;'
                     }
-                }, "禁用")
+                }, "已支付")
               ]);
-            }
+            } else if (params.row.orderStatus == 3) {
+              return h('div', [
+                h('span', {
+                    attrs: {
+                      style: 'background-color: #EEC900; color: #fff; padding: 5px 5px 5px 5px;'
+                    }
+                }, "已发货")
+              ]);
+            } else{
+              return h('div', [
+                h('span', {
+                    attrs: {
+                      style: 'background-color: #006400; color: #fff; padding: 5px 5px 5px 5px;'
+                    }
+                }, "已完成")
+              ]);
+            } 
           },
           filters: [
             {
@@ -206,7 +210,7 @@ export default {
               value: 2
             },
             {
-              label: '交易关闭',
+              label: '已发货',
               value: 3
             },
             {
@@ -282,6 +286,89 @@ export default {
     }
   },
   methods: {
+    getAllOrder(){
+      this.$axios({
+        method:'get',
+        url:'/order/getAllOrder'
+      }).then(res=>{
+        this.orderData = res.data.data;
+        for(var i = 0; i < this.orderData.length; i++){
+          this.orderData[i].createdDate = this.dateUtil(this.orderData[i].createdDate);
+          this.orderData[i].paymentDate = this.dateUtil(this.orderData[i].paymentDate);
+          this.orderData[i].endDate = this.dateUtil(this.orderData[i].endDate);
+          this.orderData[i].closeDate = this.dateUtil(this.orderData[i].closeDate);
+        }
+        this.handleListApproveHistory();
+      }).catch(error=>{
+        this.$Message.error("服务器出错，获得订单失败");
+      });
+    },
+    deleteOrder(idGroup){
+      this.$axios({
+        method:'get',
+        url:'/order/deleteOrder',
+        params:{
+          idGroup:idGroup
+        }
+      }).then(res=>{
+        if(this.rmIndex!=-1){
+          this.afterDeleteOne();
+        }else{
+          this.afterDeleteGroup();
+        }
+      });
+    },
+    updateOrder(orderId,status){
+      this.$axios({
+        method:'get',
+        url:'/order/updateStatus',
+        params:{
+          orderId:orderId,
+          status:status
+        }
+      }).then(res=>{
+        this.getAllOrder();
+        this.$Message.success("订单取消完成！");
+      }).catch(error=>{
+        this.$Message.error("服务器错误,订单取消失败！");
+      });
+    },
+    afterDeleteOne(){
+      this.remove((this.curPage-1)*this.pageSize+this.rmIndex);
+      this.$Message.success('移除成功！');
+      this.rmIndex = -1;
+    },
+    afterDeleteGroup(){
+      this.Selected = this.$refs.selection.getSelection().splice(0);
+      for (var i = 0; i < this.Selected.length; i++) {
+        for (var j = 0; j < this.orderData.length; j++) {
+          if (this.Selected[i].orderId == this.orderData[j].orderId) {
+            this.orderData.splice(j, 1);
+            break;
+          }
+        }
+      }
+      // 保存取到的所有数据
+      this.ajaxHistoryData = this.orderData;
+      this.dataCount = this.orderData.length;
+      // 初始化显示，小于每页显示条数，全显，大于每页显示条数，取前每页条数显示
+      if(this.orderData.length < this.curPage * this.pageSize){
+        this.historyData = this.ajaxHistoryData.slice((this.curPage-1)*this.pageSize, this.orderData.length);
+        if (this.orderData.length === (this.curPage-1)*this.pageSize) {
+          this.curPage--;
+          this.historyData = this.ajaxHistoryData.slice((this.curPage-1)*this.pageSize, this.orderData.length);
+        }
+      }
+      else if (this.orderData.length > this.curPage * this.pageSize) {
+        this.historyData = this.ajaxHistoryData.slice((this.curPage-1)*this.pageSize, this.curPage * this.pageSize);
+      }
+      this.$Message.success('批量移除成功！');
+        // 后台数据更新
+    },
+    dateUtil(originDate){
+      var date = new Date(+new Date(originDate)+8*3600*1000).toISOString().replace(/T/g,' ').replace(/\.[\d]{3}Z/,'');
+      return date.split(" ")[0];
+    },
     changePageSize(size) {
       this.pageSize = size;
       this.handleListApproveHistory();
@@ -334,10 +421,7 @@ export default {
     },
     ok() {
       if(this.rmIndex != -1) {
-        this.remove((this.curPage-1)*this.pageSize+this.rmIndex);
-        this.$Message.success('移除成功！');
-        this.rmIndex = -1;
-        // 后台数据更新
+        this.deleteOrder(this.historyData[this.rmIndex].orderId);
       }
     },
     cancel() {
@@ -345,32 +429,12 @@ export default {
       this.rmIndex = -1;
     },
     ok1() {
-      this.Selected = this.$refs.selection.getSelection().splice(0);
-      for (var i = 0; i < this.Selected.length; i++) {
-        for (var j = 0; j < this.orderData.length; j++) {
-          if (this.Selected[i].orderId == this.orderData[j].orderId) {
-            this.orderData.splice(j, 1);
-            break;
-          }
-        }
+      var indexSelected = this.Selected[0].orderId;
+      for(var i = 1; i < this.Selected.length; i++){
+        indexSelected += "," + this.Selected[i].orderId;
       }
-      // 保存取到的所有数据
-      this.ajaxHistoryData = this.orderData;
-      this.dataCount = this.orderData.length;
-      // 初始化显示，小于每页显示条数，全显，大于每页显示条数，取前每页条数显示
-      if(this.orderData.length < this.curPage * this.pageSize){
-        this.historyData = this.ajaxHistoryData.slice((this.curPage-1)*this.pageSize, this.orderData.length);
-        if (this.orderData.length === (this.curPage-1)*this.pageSize) {
-          this.curPage--;
-          this.historyData = this.ajaxHistoryData.slice((this.curPage-1)*this.pageSize, this.orderData.length);
-        }
-      }
-      else if (this.orderData.length > this.curPage * this.pageSize) {
-        this.historyData = this.ajaxHistoryData.slice((this.curPage-1)*this.pageSize, this.curPage * this.pageSize);
-      }
-      this.$Message.success('批量移除成功！');
-        // 后台数据更新
-      },
+      this.deleteOrder(indexSelected);
+    },
     cancel1() {
       this.$Message.success('取消移除！');
     },
@@ -383,14 +447,31 @@ export default {
     ok3() {
       var order = this.orderData[(this.curPage-1)*this.pageSize+this.rmIndex];
       var orderId = order.orderId;
-      // 后台进行持久层变更
+      this.updateOrder(orderId,0);
       this.rmIndex = -1;
     },
     cancel3() {
+      this.rmIndex = -1;
+    },
+    isEqualSearchData(element){
+      var reg = new RegExp(this.searchData);
+      return element.orderId.match(reg);
+    },
+    confirmSearch(){
+      this.ajaxHistoryData = this.orderData.filter(this.isEqualSearchData);
+      if(this.ajaxHistoryData.length < this.pageSize){
+        this.historyData = this.ajaxHistoryData;
+      }else{
+        this.historyData = this.ajaxHistoryData.slice(0,this.pageSize);
+      }
+    },
+    cancelSearch(){
+      this.handleListApproveHistory();
+      this.searchData = '';
     }
   },
   created() {
-    this.handleListApproveHistory();
+    this.getAllOrder();
   }
 }
 </script>
