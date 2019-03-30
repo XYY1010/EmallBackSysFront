@@ -503,7 +503,13 @@ export default {
           idGroup:idGroup
         }
       }).then(res=>{
-        this.modalStatus1 = true;
+        if(this.rmIndex==-1){
+          this.modalStatus1 = true;
+        }else{
+          this.remove((this.curPage-1)*this.pageSize+this.rmIndex);
+          this.$Message.success('移除成功！');
+          this.rmIndex = -1;  // 后台数据更新
+        }
       }).catch(error=>{
         this.$Message.error("服务器错误,删除用户出错");
       });
@@ -519,7 +525,7 @@ export default {
       params.append('gender',this.formData.gender);
       params.append('avatarUrl', this.formData.avatarUrl);
       params.append('hometown', this.formData.hometown);      
-      params.append('birthday', this.formData.birthday);
+      params.append('birthday', this.dateUtil(this.formData.birthday));
       this.$axios({
         method:'post',
         url:'/user/modifyUser',
@@ -530,8 +536,7 @@ export default {
         },
         data:params
       }).then(res=>{
-        this.$Message.success('修改成功！');
-        this.handleListApproveHistory();
+        this.getAllUser();
       }).catch(error=>{
         this.$Message.error(error);
       });
@@ -691,10 +696,7 @@ export default {
     },
     ok() {
       if(this.rmIndex != -1) {
-        this.remove((this.curPage-1)*this.pageSize+this.rmIndex);
-        this.$Message.success('移除成功！');
-        this.rmIndex = -1;
-        // 后台数据更新
+          this.deleteUser(this.historyData[this.rmIndex].userId);
       }
     },
     cancel() {

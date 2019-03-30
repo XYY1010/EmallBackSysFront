@@ -251,7 +251,7 @@ export default {
         },
         {
           title: '是否已启用',
-          key:'used',
+          key:'isUsed',
           align: 'center',
           render: (h, params) => {
             if (params.row.used == true) {
@@ -305,12 +305,14 @@ export default {
                   on: {
                     click: () => {
                       this.show = true;
+                      this.formData.adminId = params.row.adminId;
                       this.formData.adminName = params.row.adminName;
                       this.formData.phone = params.row.phone;
-                      this.formData.address = params.row.address;
                       this.formData.email = params.row.email;
                       this.formData.gender = params.row.gender;
                       this.formData.used = params.row.used;
+                      this.formData.createdDate = params.row.createdDate;
+                      this.formData.updatedDate = params.row.updatedDate;
                     }
                   }
               }),
@@ -411,7 +413,6 @@ export default {
         url:'/admin/getAll'
       }).then(res=>{
         this.adminsData = res.data.data;
-        console.log(this.adminsData);
         for(var i = 0; i < this.adminsData.length; i++){
           this.adminsData[i].createdDate = this.dateUtil(this.adminsData[i].createdDate);
           this.adminsData[i].updatedDate = this.dateUtil(this.adminsData[i].updatedDate);
@@ -435,8 +436,8 @@ export default {
       }).then(res=>{
         var data = res.data.data;
         this.newAdminData.adminId = data.adminId;
-        this.newAdminData.createdDate = data.createdDate;
-        this.newAdminData.updatedDate = data.updatedDate;
+        this.newAdminData.createdDate = this.dateUtil(data.createdDate);
+        this.newAdminData.updatedDate = this.dateUtil(data.updatedDate);
         this.newAdminData.used = true;
         this.adminsData.push(this.newAdminData);
         this.handleListApproveHistory();
@@ -454,7 +455,38 @@ export default {
           idGroup:idGroup
         }
       }).then(res=>{
-        this.Selected =this.$refs.selection.getSelection().splice(0);
+        if(this.rmIndex!=-1){
+          this.afterDeleteOne();
+        }else{
+          this.afterDeleteGroup();
+        }
+      }).catch(error=>{
+        this.$Message.error(error);
+      });
+    },
+    modifyAdmin(){
+      var params = new URLSearchParams();
+      params.append('adminId', this.formData.adminId);
+      params.append('adminName', this.formData.adminName);
+      params.append('password', this.formData.password);
+      params.append('email', this.formData.email);
+      params.append('phone', this.formData.phone);
+      params.append('gender', this.formData.gender);
+      params.append('isUsed', this.formData.used);
+      params.append('createdDate', this.formData.createdDate);
+      this.$axios({
+        method:'post',
+        url:'/admin/modifyAdmin',
+        data:params
+      }).then(res=>{
+        this.$Message.success('修改成功！');
+        this.getAllAdmin();
+      }).catch(error=>{
+        this.$Message.error("服务器错误,修改失败！");
+      });
+    },
+    afterDeleteGroup(){
+      this.Selected =this.$refs.selection.getSelection().splice(0);
         for (var i = 0; i < this.Selected.length; i++) {
           for (var j = 0; j < this.adminsData.length; j++) {
             if (this.Selected[i].adminId === this.adminsData[j].adminId) {
@@ -477,9 +509,12 @@ export default {
           this.historyData = this.ajaxHistoryData.slice((this.curPage-1)*this.pageSize, this.curPage * this.pageSize);
         }
         this.$Message.success('批量移除成功！'); 
-      }).catch(error=>{
-        this.$Message.error(error);
-      });
+    },
+    afterDeleteOne(){
+       this.remove((this.curPage-1)*this.pageSize+this.rmIndex);
+        this.$Message.success('移除成功！');
+        this.rmIndex = -1;
+        // 后台数据更新
     },
     dateUtil(originDate){
       var date = new Date(+new Date(originDate)+8*3600*1000).toISOString().replace(/T/g,' ').replace(/\.[\d]{3}Z/,'');
@@ -535,9 +570,8 @@ export default {
       this.$refs[e].validate((valid) => {
         if (valid) {
         this.show = false;
-        this.handleListApproveHistory();
-        this.$Message.success('添加成功！');
-          // 后台数据更新
+        console.log(this.formData);
+        this.modifyAdmin();
         } else {
           this.$Message.error('添加失败!');
         }
@@ -591,10 +625,7 @@ export default {
     },
     ok() {
       if(this.rmIndex != -1) {
-          this.remove((this.curPage-1)*this.pageSize+this.rmIndex);
-          this.$Message.success('移除成功！');
-          this.rmIndex = -1;
-        // 后台数据更新
+          this.deleteAdmin(this.historyData[this.rmIndex].adminId);
       }
     },
     cancel() {
