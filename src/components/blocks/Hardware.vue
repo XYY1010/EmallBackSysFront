@@ -3,7 +3,7 @@
     <Alert show-icon class="tips-box" type="warning">
         小提示
         <Icon type="md-bulb" slot="icon"></Icon>
-        <template slot="desc">首页智能硬件板块管理。</template>
+        <template slot="intro">首页手机板块管理。</template>
     </Alert>
     <div class="btns-div">
       <Button type="primary" icon="md-refresh" size="large" @click="changeAD">更换左侧宣传广告</Button>
@@ -17,17 +17,17 @@
             title="更换左侧宣传图"
             @on-ok="ok"
             @on-cancel="cancel">
-            <Form :model="newHardwareData">
+            <Form :model="phonePropagandaData">
                 <Row :gutter="32">
                     <Col span="12">
                         <FormItem label="跳转链接" label-position="top">
-                            <Input v-model="newHardwareData.sourceUrl" placeholder="请输入跳转链接">
+                            <Input v-model="phonePropagandaData.sourceUrl" placeholder="请输入跳转链接">
                             </Input>
                         </FormItem>
                     </Col>
                     <Col span="12">
                         <FormItem label="宣传图Url" label-position="top">
-                          <Input v-model="newHardwareData.imgUrl" placeholder="请输入缩略图地址">
+                          <Input disabled v-model="phonePropagandaData.imgUrl" placeholder="请输入缩略图地址">
                           </Input>
                         </FormItem>
                     </Col>
@@ -36,12 +36,24 @@
                 <Row :gutter="32">
                   <Col span="12">
                     <FormItem label="宣传图" label-position="top">
-                      <Img :src="newHardwareData.imgUrl" style="width:134px;height:314px;"/>
+                      <Img :src="phonePropagandaData.imgUrl" style="width:134px;height:314px;"/>
                     </FormItem>
                   </Col>
                   <Col span="12">
                       <FormItem label="上传宣传图" label-position="top">
-                        <Upload multiple ref="upload" :format="['jpg','jpeg','png']" :max-size="2048" :before-upload="handleBeforeUpload" :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize" type="drag" action="//jsonplaceholder.typicode.com/posts/">
+                        <Upload multiple 
+                        ref="upload"
+                        name="upfile"
+                        :format="['jpg','jpeg','png']" 
+                        :max-size="2048" 
+                        :headers="headers"
+                        :before-upload="handleBeforeUpload" 
+                        :on-format-error="handleFormatError" 
+                        :on-exceeded-size="handleMaxSize"
+                        :on-error="uploadError" 
+                        :on-success="addUploadSuccess" 
+                        type="drag" 
+                        action="http://localhost:8090/file/uploading">
                             <div style="width:134px;height:314px;padding: 157px 67px">
                                 <Icon type="md-add" size="20"></Icon>
                             </div>
@@ -53,18 +65,20 @@
             </Form>
         </Modal>
 
-    <Drawer
+        <Drawer
             title="修改"
             v-model="show"
             width="720"
             :mask-closable="false"
             :styles="styles"
-        >
+            >
             <Form :model="formData">
                 <Row :gutter="32">
                     <Col span="12">
-                        <FormItem label="商品名" label-position="top">
-                            <Input v-model="formData.title" placeholder="请输入商品名" />
+                        <FormItem label="选择商品" label-position="top">
+                            <Select v-model="selectedIndex" placeholder="请选择商品">
+                                <Option v-for="(item,index) in optionList" :key="index" :value="index">{{item.title}}</Option>
+                            </Select>
                         </FormItem>
                     </Col>
                     <Col span="12">
@@ -78,6 +92,7 @@
                     <Col span="12">
                         <FormItem label="现价" label-position="top">
                           <InputNumber
+                           disabled
                            size="large"
                            :min="0"
                            v-model="formData.price"
@@ -89,7 +104,7 @@
                           <InputNumber
                            size="large"
                            :min="0"
-                           v-model="formData.oldPrice===undefined?0:formData.oldPrice"
+                           v-model="formData.oldPrice"
                            :formatter="value => `￥ ${value}`"></InputNumber>
                         </FormItem>
                     </Col>
@@ -113,7 +128,7 @@
                 <Row :gutter="32">
                     <Col span="12">
                         <FormItem label="展示图Url" label-position="top">
-                          <Input v-model="formData.imgUrl" placeholder="请输入缩略图地址">
+                          <Input disabled v-model="formData.imgUrl" placeholder="请输入缩略图地址">
                           </Input>
                         </FormItem>
                     </Col>
@@ -133,7 +148,7 @@
                     </Col>
                     <Col span="12">
                       <FormItem label="商品描述" label-position="top">
-                        <Input type="textarea" v-model="formData.desc" :rows="7" placeholder="请输入商品描述" />
+                        <Input type="textarea" v-model="formData.intro" :rows="7" placeholder="请输入商品描述" />
                       </FormItem>
                     </Col>
                 </Row>
@@ -148,7 +163,7 @@
 
 <script>
 export default {
-  name: 'hardware',
+  name: 'phone',
   data() {
     return {
       ajaxHistoryData:[],
@@ -157,6 +172,13 @@ export default {
       // 每页显示多少条
       pageSize:5,
       historyData: [],
+      selectedIndex:'',
+      optionList:[],
+      oldItemId:'',
+      headers:{
+        'Access-Control-Allow-Methods': 'PUT,POST,GET,DELETE,OPTIONS',
+        'Access-Control-Allow-Origin': '*'
+      },
       loading: false,
       show: false,
       modal1: false,
@@ -196,7 +218,7 @@ export default {
         },
         {
           title: '商品描述',
-          key: 'desc',
+          key: 'intro',
           align: 'center'
         },
         {
@@ -291,10 +313,12 @@ export default {
                   on: {
                     click: () => {
                       this.show = true;
+                      this.oldItemId = params.row.id;
+                      this.formData.itemId = params.row.id;
                       this.formData.title = params.row.title;
                       this.formData.sourceUrl = params.row.sourceUrl;
                       this.formData.imgUrl = params.row.imgUrl;
-                      this.formData.desc = params.row.desc;
+                      this.formData.intro = params.row.intro;
                       this.formData.price = params.row.price;
                       this.formData.oldPrice = params.row.oldPrice;
                       this.formData.sorted = params.row.sorted;
@@ -307,19 +331,11 @@ export default {
           }
         }
       ],
-      hardwareData: [
-        {id:1, sourceUrl: '//item.mi.com/1161200059.html', imgUrl: 'http://i3.mifile.cn/a4/T1rQAgB7Av1RXrhCrK.jpg', title: '小米路由器3', desc: '四天线设计，更安全更稳定', price: '149', discountType: 'free', discount: '免邮费', sorted: 1},
-        {id:2, sourceUrl: '//www.mi.com/mibicycle/', imgUrl: 'http://i3.mifile.cn/a4/2b69b930-a2fd-4d09-a46a-8690cb79f764', title: '电助力折叠自行车', desc: '力矩传感电助力，让城市出行轻松有趣', price: '149', discountType: 'new', discount: '新品', sorted: 2},
-        {id:3, sourceUrl: '//www.mi.com/mitu/', imgUrl: 'http://i1.mifile.cn/a1/pms_1464615180.86261317!220x220.jpg', title: '米兔智能故事机', desc: '能说会道，宝宝的好玩伴', price: '199', discountType: 'new', discount: '新品', sorted: 3},
-        {id:4, sourceUrl: '//www.mi.com/water2/', imgUrl: '//i3.mifile.cn/a4/T1zTK_Bbhv1RXrhCrK.jpg', title: '小米净水器', desc: '厨下式 RO反渗透直出纯净水，包邮包安装', price: '1999', sorted: 4},
-        {id:5, sourceUrl: '//www.mi.com/ihealth/ ', imgUrl: 'http://i1.mifile.cn/a1/T17FCQByWv1RXrhCrK!220x220.jpg', title: 'iHealth智能血压计（蓝牙版）', desc: '送给父母的健康礼物 测血压仅需1步', price: '199', sorted: 5},
-        {id:6, sourceUrl: '//www.mi.com/dianfanbao/', imgUrl: 'http://i1.mifile.cn/a1/T1OVC_ByY_1RXrhCrK!220x220.jpg', title: '米家压力IH电饭煲', desc: '智能烹饪，3L 容量', price: '999', sorted: 6},
-        {id:7, sourceUrl: '//item.mi.com/1163200015.html', imgUrl: 'http://i1.mifile.cn/a1/pms_1470730028.12443689!220x220.jpg', title: '全系智能套装限时款', desc: '开启你的智能生活', price: '292', oldPrice: '325', discountType: 'discount', discount: '享九折', sorted: 7},
-        {id:8, sourceUrl: '//list.mi.com/accessories/tag?id=guangganban', imgUrl: 'http://i1.mifile.cn/a1/T1HcAQBgDT1RXrhCrK!220x220.jpg', title: '小米手环 光感版', desc: '实时监测心率，科学运动', price: '99', sorted: 8}
+      phoneData: [
       ],
-      hardwarePropagandaData: {
-        sourceUrl: 'http://www.mi.com/scooter/',
-        imgUrl: 'http://i3.mifile.cn/a4/124d82cc-cfce-44ab-b711-28b21be81683'
+      phonePropagandaData: {
+        sourceUrl: '#',
+        imgUrl: 'https://i1.mifile.cn/a4/xmad_1544580545953_UvEXK.jpg'
       },
       Selected: [],
       styles: {
@@ -329,39 +345,128 @@ export default {
         position: 'static'
       },
       formData: {
+        itemId: '',
         sourceUrl: '',
         imgUrl: '',
         title: '',
-        desc: '',
+        intro: '',
         discountType: '',
         discount: '',
         price: 0,
         oldPrice: 0,
         sorted: 0,
       },
-      newHardwareData: {
-        sourceUrl: '',
-        imgUrl: ''
-      },
     }
   },
   methods: {
+    getListDetail(listId){
+      this.$axios({
+        method:'get',
+        url:'/indexList/getIndexList',
+        params:{
+          listId:listId
+        }
+      }).then(res=>{
+        this.phonePropagandaData = res.data.data;
+      }).catch(error=>{
+        this.$Message.error("服务器错误！");
+      });
+    },
+    modifyphonePropagandaData(listId){
+      this.$axios({
+        method:'get',
+        url:'/indexList/modifyIndexList',
+        params:{
+          listId:listId,
+          sourceUrl:this.phonePropagandaData.sourceUrl,
+          imgUrl:this.phonePropagandaData.imgUrl
+        }
+      }).then(res=>{
+        this.$Message.success("更换成功！");
+      }).catch(error=>{
+        this.$Message.error("服务器错误,更换失败！");
+      });
+    },
+    getAllItem(listId){
+      this.$axios({
+        method:'get',
+        url:'/indexListItem/getAllItem',
+        params:{
+          listId:listId
+        }
+      }).then(res=>{
+        this.phoneData = res.data.data;
+        this.handleListApproveHistory();
+      }).catch(error=>{
+        this.$Message.error("服务器错误,获得列表失败!");
+      });
+    },
+    modifyItem(){
+      this.$axios({
+        method:'post',
+        url:'/indexListItem/modifyItem',
+        params:{
+          oldItemId:this.oldItemId,
+          itemId:this.formData.itemId,
+          listId:1004,
+          sourceUrl:this.formData.sourceUrl,
+          intro:this.formData.intro,
+          oldPrice:this.formData.oldPrice,
+          discountType:this.formData.discountType,
+          discount:this.formData.discount,
+          sorted:this.formData.sorted
+        }
+      }).then(res=>{
+        this.$Message.success("修改成功！");
+        this.oldItemId = '';
+        this.getAllItem(1004);
+      }).catch(error=>{
+        console.log(error);
+        this.oldItemId = '';
+        this.$Message.error("服务器错误,修改失败！");
+      });
+    },
+    getOptionList(){
+      this.$axios({
+        method:'get',
+        url:'/item/getByCatId',
+        params:{
+          catId: '4,12,15'
+        }
+      }).then(res=>{
+        this.optionList = res.data.data;
+      }).catch(error=>{
+        this.$Message.error("服务器错误");
+      });
+    },
+    getItemDetail(itemId){
+      this.$axios({
+        method:'get',
+        url:'/item/getItemDetail',
+        params:{
+          itemId:itemId
+        }
+      }).then(res=>{
+        this.formData.price = res.data.data.price;
+        this.formData.imgUrl = res.data.data.imgUrl;
+      }).catch(error=>{
+        this.$Message.error("服务器错误");
+      });
+    },
     changePageSize(size) {
       this.pageSize = size;
       this.handleListApproveHistory();
     },
     changeAD() {
       this.modal1 = true;
-      this.newHardwareData.sourceUrl = this.hardwarePropagandaData.sourceUrl;
-      this.newHardwareData.imgUrl = this.hardwarePropagandaData.imgUrl;
     },
     Submit() {
+      if(this.formData.oldPrice==undefined) this.formData.oldPrice = 0;
       this.show = false;
-       this.$Message.success('修改成功！');
+      this.modifyItem();
     },
     ok() {
-      this.$Message.success('更换成功！');
-      console.log(this.newHardwareData);
+      this.modifyphonePropagandaData(1004);
     },
     cancel() {
       this.$Message.success('取消更换！');
@@ -369,10 +474,10 @@ export default {
     // 获取历史记录信息
     handleListApproveHistory(){
       // 保存取到的所有数据
-      this.ajaxHistoryData = this.hardwareData
-      this.dataCount = this.hardwareData.length;
+      this.ajaxHistoryData = this.phoneData
+      this.dataCount = this.phoneData.length;
       // 初始化显示，小于每页显示条数，全显，大于每页显示条数，取前每页条数显示
-      if(this.hardwareData.length < this.pageSize){
+      if(this.phoneData.length < this.pageSize){
         this.historyData = this.ajaxHistoryData;
       }else{
         this.historyData = this.ajaxHistoryData.slice(0,this.pageSize);
@@ -400,18 +505,35 @@ export default {
     handleFormatError(file) {
       this.$Notice.warning({
         title: '文件格式不正确',
-        desc: '文件 ' + file.name + ' 格式不正确，请上传 jpg 或 png 格式的图片。'
+        intro: '文件 ' + file.name + ' 格式不正确，请上传 jpg 或 png 格式的图片。'
       })
     },
     handleMaxSize(file) {
       this.$Notice.warning({
         title: '超出文件大小限制',
-        desc: '文件 ' + file.name + ' 太大，不能超过 2M。'
+        intro: '文件 ' + file.name + ' 太大，不能超过 2M。'
       })
+    },
+    addUploadSuccess(res,file,fileList){
+      this.$Message.success("上传成功");
+      this.phonePropagandaData.imgUrl = res.data;
+    },
+    uploadError(a,b,c){
+      this.$Message.error(a.data);
     }
   },
   created(){
-    this.handleListApproveHistory();
+    this.getAllItem(1004);
+    this.getListDetail(1004);
+    this.getOptionList();
+  },
+  watch:{
+    selectedIndex(val,newVal){
+      var itemId = this.optionList[this.selectedIndex].itemId;
+      this.formData.itemId = itemId;
+      this.formData.title = this.optionList[this.selectedIndex].title;
+      this.getItemDetail(itemId);
+    }
   }
 }
 </script>

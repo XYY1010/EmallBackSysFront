@@ -3,13 +3,13 @@
     <Alert show-icon class="tips-box" type="warning">
         小提示
         <Icon type="md-bulb" slot="icon"></Icon>
-        <template slot="desc">首页配件板块管理。</template>
+        <template slot="intro">首页手机板块管理。</template>
     </Alert>
     <div class="btns-div">
       <Button type="primary" icon="md-refresh" size="large" @click="changeAD">更换左侧宣传广告</Button>
       显示 <InputNumber v-model="pageSize" size="large" @on-change="changePageSize" :min="1" :max="8"></InputNumber> 条
     </div>
-    <Table border :columns="columns" :data="historyData" no-data-text="配件模块信息空空如也，请添加~~~"></Table>
+    <Table border :columns="columns" :data="historyData" no-data-text="手机模块信息空空如也，请添加~~~"></Table>
     <Page :total="dataCount" :page-size="pageSize" show-total class="paging" @on-change="changepage"></Page>
 
     <Modal
@@ -17,30 +17,43 @@
             title="更换左侧宣传图"
             @on-ok="ok"
             @on-cancel="cancel">
-            <Form :model="newPhoneData">
+            <Form :model="phonePropagandaData">
                 <Row :gutter="32">
                     <Col span="12">
                         <FormItem label="跳转链接" label-position="top">
-                            <Input v-model="newPhoneData.sourceUrl" placeholder="请输入跳转链接">
+                            <Input v-model="phonePropagandaData.sourceUrl" placeholder="请输入跳转链接">
                             </Input>
                         </FormItem>
                     </Col>
                     <Col span="12">
                         <FormItem label="宣传图Url" label-position="top">
-                          <Input v-model="newPhoneData.imgUrl" placeholder="请输入缩略图地址">
+                          <Input disabled v-model="phonePropagandaData.imgUrl" placeholder="请输入缩略图地址">
                           </Input>
                         </FormItem>
                     </Col>
                 </Row>
+
                 <Row :gutter="32">
                   <Col span="12">
                     <FormItem label="宣传图" label-position="top">
-                      <Img :src="newPhoneData.imgUrl" style="width:134px;height:314px;"/>
+                      <Img :src="phonePropagandaData.imgUrl" style="width:134px;height:314px;"/>
                     </FormItem>
                   </Col>
                   <Col span="12">
                       <FormItem label="上传宣传图" label-position="top">
-                        <Upload multiple ref="upload" :format="['jpg','jpeg','png']" :max-size="2048" :before-upload="handleBeforeUpload" :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize" type="drag" action="//jsonplaceholder.typicode.com/posts/">
+                        <Upload multiple 
+                        ref="upload"
+                        name="upfile"
+                        :format="['jpg','jpeg','png']" 
+                        :max-size="2048" 
+                        :headers="headers"
+                        :before-upload="handleBeforeUpload" 
+                        :on-format-error="handleFormatError" 
+                        :on-exceeded-size="handleMaxSize"
+                        :on-error="uploadError" 
+                        :on-success="addUploadSuccess" 
+                        type="drag" 
+                        action="http://localhost:8090/file/uploading">
                             <div style="width:134px;height:314px;padding: 157px 67px">
                                 <Icon type="md-add" size="20"></Icon>
                             </div>
@@ -52,24 +65,47 @@
             </Form>
         </Modal>
 
-    <Drawer
+        <Drawer
             title="修改"
             v-model="show"
             width="720"
             :mask-closable="false"
             :styles="styles"
-        >
+            >
             <Form :model="formData">
                 <Row :gutter="32">
                     <Col span="12">
-                        <FormItem label="商品名" label-position="top">
-                            <Input v-model="formData.title" placeholder="请输入商品名" />
+                        <FormItem label="选择商品" label-position="top">
+                            <Select v-model="selectedIndex" placeholder="请选择商品">
+                                <Option v-for="(item,index) in optionList" :key="index" :value="index">{{item.title}}</Option>
+                            </Select>
                         </FormItem>
                     </Col>
                     <Col span="12">
                         <FormItem label="跳转链接" label-position="top">
                             <Input v-model="formData.sourceUrl" placeholder="请输入跳转链接">
                             </Input>
+                        </FormItem>
+                    </Col>
+                </Row>
+                <Row :gutter="32">
+                    <Col span="12">
+                        <FormItem label="现价" label-position="top">
+                          <InputNumber
+                           disabled
+                           size="large"
+                           :min="0"
+                           v-model="formData.price"
+                           :formatter="value => `￥ ${value}`"></InputNumber>
+                        </FormItem>
+                    </Col>
+                    <Col span="12">
+                        <FormItem label="原价" label-position="top">
+                          <InputNumber
+                           size="large"
+                           :min="0"
+                           v-model="formData.oldPrice"
+                           :formatter="value => `￥ ${value}`"></InputNumber>
                         </FormItem>
                     </Col>
                 </Row>
@@ -91,28 +127,8 @@
                 </Row>
                 <Row :gutter="32">
                     <Col span="12">
-                        <FormItem label="现价" label-position="top">
-                          <InputNumber
-                           size="large"
-                           :min="0"
-                           v-model="formData.price"
-                           :formatter="value => `￥ ${value}`"></InputNumber>
-                        </FormItem>
-                    </Col>
-                    <Col span="12">
-                        <FormItem label="原价" label-position="top">
-                          <InputNumber
-                           size="large"
-                           :min="0"
-                           v-model="formData.oldPrice===undefined?0:formData.oldPrice"
-                           :formatter="value => `￥ ${value}`"></InputNumber>
-                        </FormItem>
-                    </Col>
-                </Row>
-                <Row :gutter="32">
-                    <Col span="12">
                         <FormItem label="展示图Url" label-position="top">
-                          <Input v-model="formData.imgUrl" placeholder="请输入缩略图地址">
+                          <Input disabled v-model="formData.imgUrl" placeholder="请输入缩略图地址">
                           </Input>
                         </FormItem>
                     </Col>
@@ -132,7 +148,7 @@
                     </Col>
                     <Col span="12">
                       <FormItem label="商品描述" label-position="top">
-                        <Input type="textarea" v-model="formData.desc" :rows="7" placeholder="请输入商品描述" />
+                        <Input type="textarea" v-model="formData.intro" :rows="7" placeholder="请输入商品描述" />
                       </FormItem>
                     </Col>
                 </Row>
@@ -147,7 +163,7 @@
 
 <script>
 export default {
-  name: 'appliance',
+  name: 'phone',
   data() {
     return {
       ajaxHistoryData:[],
@@ -156,6 +172,13 @@ export default {
       // 每页显示多少条
       pageSize:5,
       historyData: [],
+      selectedIndex:'',
+      optionList:[],
+      oldItemId:'',
+      headers:{
+        'Access-Control-Allow-Methods': 'PUT,POST,GET,DELETE,OPTIONS',
+        'Access-Control-Allow-Origin': '*'
+      },
       loading: false,
       show: false,
       modal1: false,
@@ -195,7 +218,7 @@ export default {
         },
         {
           title: '商品描述',
-          key: 'desc',
+          key: 'intro',
           align: 'center'
         },
         {
@@ -290,11 +313,14 @@ export default {
                   on: {
                     click: () => {
                       this.show = true;
+                      this.oldItemId = params.row.id;
+                      this.formData.itemId = params.row.id;
                       this.formData.title = params.row.title;
                       this.formData.sourceUrl = params.row.sourceUrl;
                       this.formData.imgUrl = params.row.imgUrl;
-                      this.formData.desc = params.row.desc;
+                      this.formData.intro = params.row.intro;
                       this.formData.price = params.row.price;
+                      this.formData.oldPrice = params.row.oldPrice;
                       this.formData.sorted = params.row.sorted;
                       this.formData.discount = params.row.discount;
                       this.formData.discountType = params.row.discountType;
@@ -305,24 +331,9 @@ export default {
           }
         }
       ],
-      applianceData: [
-        {sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1539315570.63599432!220x220.jpg', title: '小米电视4X 43英寸', price: 1399,
-				reviewDesc: '电视很好，够清晰，这个价格打特价很划算.', reviewAuthor: '1432693760', reviewStatus: true, discountType: 'new', discount: '新品'},
-				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1510111588.69169839!220x220.jpg', title: '小米电视4 55英寸', price: 3699, oldPrice: 3999, discountType: 'discount', discount: '减300元', desc: '4.9mm 极超薄机身 / 2GB+8GB 大内存空间',
-				reviewDesc: '很惊艳，全家人都很喜欢，感觉有点买小了！效果也不错', reviewAuthor: '妳狠重要', reviewStatus: true},
-				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1500287084.72131750!220x220.jpg', title: '小米电视4A 32英寸', price: 899, desc: '64位四核处理器 / 1GB+4GB大内存',
-				reviewDesc: '放在次卧，看着刚好，清晰度能接受，一台红米的这个价格...', reviewAuthor: '▓▓▓▓', reviewStatus: true, discountType: 'discount', discount: '减100元', oldPrice: 999},
-				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1522318330.86967810!220x220.jpg', title: '小米电视4C 50英寸', price: 1899, desc: '4K HDR / 人工智能语音',
-				reviewDesc: '朋友同事来家都说电视超值，非常棒，花最少的钱，享最好...', reviewAuthor: '煎饼', reviewStatus: true, oldPrice: 39, discountType: 'discount', discount: '减300', oldPrice: 2199},
-				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1539855763.04646220!220x220.jpg', title: '小米电视4A 58英寸', price: 2499,
-				reviewDesc: '电视非常大，智能语言遥控，画面清析，效果好，这是第二...', reviewAuthor: '大民', reviewStatus: true, discountType: 'new', discount:'新品'},
-				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1540366231.87578189!220x220.jpg', title: '小米电视4 65英寸全面屏旗舰版', price: 5999,
-				reviewDesc: '电视非常好，大气，非常清楚。我是相信小米，希望小米的...', reviewAuthor: '2171033765', reviewStatus: true, discountType: 'new', discount: '新品'},
-				{sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1499072633.96298268!220x220.jpg', title: '小米盒子3 增强版', price: 399, desc: '高端 4K 网络机顶盒',
-				reviewDesc: '小米盒子3增强版外观精致，设计精巧，运行速度很快，操...', reviewAuthor: 'jin', reviewStatus: true, oldPrice: 449, discountType: 'discount', discount: '减50元'},
-				{moreUrl: '', sourceUrl: '', imgUrl: 'https://i1.mifile.cn/a1/pms_1479190789.95594557!220x220.jpg', title: '小米盒子3s', price: 299, moreItem: '电视影音'}
+      phoneData: [
       ],
-      appliancePropagandaData: {
+      phonePropagandaData: {
         sourceUrl: '#',
         imgUrl: 'https://i1.mifile.cn/a4/xmad_1544580545953_UvEXK.jpg'
       },
@@ -334,39 +345,128 @@ export default {
         position: 'static'
       },
       formData: {
+        itemId: '',
         sourceUrl: '',
         imgUrl: '',
         title: '',
-        desc: '',
+        intro: '',
         discountType: '',
         discount: '',
         price: 0,
         oldPrice: 0,
         sorted: 0,
       },
-      newPhoneData: {
-        sourceUrl: '',
-        imgUrl: ''
-      },
     }
   },
   methods: {
+    getListDetail(listId){
+      this.$axios({
+        method:'get',
+        url:'/indexList/getIndexList',
+        params:{
+          listId:listId
+        }
+      }).then(res=>{
+        this.phonePropagandaData = res.data.data;
+      }).catch(error=>{
+        this.$Message.error("服务器错误！");
+      });
+    },
+    modifyphonePropagandaData(listId){
+      this.$axios({
+        method:'get',
+        url:'/indexList/modifyIndexList',
+        params:{
+          listId:listId,
+          sourceUrl:this.phonePropagandaData.sourceUrl,
+          imgUrl:this.phonePropagandaData.imgUrl
+        }
+      }).then(res=>{
+        this.$Message.success("更换成功！");
+      }).catch(error=>{
+        this.$Message.error("服务器错误,更换失败！");
+      });
+    },
+    getAllItem(listId){
+      this.$axios({
+        method:'get',
+        url:'/indexListItem/getAllItem',
+        params:{
+          listId:listId
+        }
+      }).then(res=>{
+        this.phoneData = res.data.data;
+        this.handleListApproveHistory();
+      }).catch(error=>{
+        this.$Message.error("服务器错误,获得列表失败!");
+      });
+    },
+    modifyItem(){
+      this.$axios({
+        method:'post',
+        url:'/indexListItem/modifyItem',
+        params:{
+          oldItemId:this.oldItemId,
+          itemId:this.formData.itemId,
+          listId:1003,
+          sourceUrl:this.formData.sourceUrl,
+          intro:this.formData.intro,
+          oldPrice:this.formData.oldPrice,
+          discountType:this.formData.discountType,
+          discount:this.formData.discount,
+          sorted:this.formData.sorted
+        }
+      }).then(res=>{
+        this.$Message.success("修改成功！");
+        this.oldItemId = '';
+        this.getAllItem(1003);
+      }).catch(error=>{
+        console.log(error);
+        this.oldItemId = '';
+        this.$Message.error("服务器错误,修改失败！");
+      });
+    },
+    getOptionList(){
+      this.$axios({
+        method:'get',
+        url:'/item/getByCatId',
+        params:{
+          catId: '3,7'
+        }
+      }).then(res=>{
+        this.optionList = res.data.data;
+      }).catch(error=>{
+        this.$Message.error("服务器错误");
+      });
+    },
+    getItemDetail(itemId){
+      this.$axios({
+        method:'get',
+        url:'/item/getItemDetail',
+        params:{
+          itemId:itemId
+        }
+      }).then(res=>{
+        this.formData.price = res.data.data.price;
+        this.formData.imgUrl = res.data.data.imgUrl;
+      }).catch(error=>{
+        this.$Message.error("服务器错误");
+      });
+    },
     changePageSize(size) {
       this.pageSize = size;
       this.handleListApproveHistory();
     },
     changeAD() {
       this.modal1 = true;
-      this.newPhoneData.sourceUrl = this.appliancePropagandaData.sourceUrl;
-      this.newPhoneData.imgUrl = this.appliancePropagandaData.imgUrl;
     },
     Submit() {
+      if(this.formData.oldPrice==undefined) this.formData.oldPrice = 0;
       this.show = false;
-       this.$Message.success('修改成功！');
+      this.modifyItem();
     },
     ok() {
-      this.$Message.success('更换成功！');
-      console.log(this.newPhoneData);
+      this.modifyphonePropagandaData(1003);
     },
     cancel() {
       this.$Message.success('取消更换！');
@@ -374,10 +474,10 @@ export default {
     // 获取历史记录信息
     handleListApproveHistory(){
       // 保存取到的所有数据
-      this.ajaxHistoryData = this.applianceData
-      this.dataCount = this.applianceData.length;
+      this.ajaxHistoryData = this.phoneData
+      this.dataCount = this.phoneData.length;
       // 初始化显示，小于每页显示条数，全显，大于每页显示条数，取前每页条数显示
-      if(this.applianceData.length < this.pageSize){
+      if(this.phoneData.length < this.pageSize){
         this.historyData = this.ajaxHistoryData;
       }else{
         this.historyData = this.ajaxHistoryData.slice(0,this.pageSize);
@@ -405,18 +505,35 @@ export default {
     handleFormatError(file) {
       this.$Notice.warning({
         title: '文件格式不正确',
-        desc: '文件 ' + file.name + ' 格式不正确，请上传 jpg 或 png 格式的图片。'
+        intro: '文件 ' + file.name + ' 格式不正确，请上传 jpg 或 png 格式的图片。'
       })
     },
     handleMaxSize(file) {
       this.$Notice.warning({
         title: '超出文件大小限制',
-        desc: '文件 ' + file.name + ' 太大，不能超过 2M。'
+        intro: '文件 ' + file.name + ' 太大，不能超过 2M。'
       })
+    },
+    addUploadSuccess(res,file,fileList){
+      this.$Message.success("上传成功");
+      this.phonePropagandaData.imgUrl = res.data;
+    },
+    uploadError(a,b,c){
+      this.$Message.error(a.data);
     }
   },
   created(){
-    this.handleListApproveHistory();
+    this.getAllItem(1003);
+    this.getListDetail(1003);
+    this.getOptionList();
+  },
+  watch:{
+    selectedIndex(val,newVal){
+      var itemId = this.optionList[this.selectedIndex].itemId;
+      this.formData.itemId = itemId;
+      this.formData.title = this.optionList[this.selectedIndex].title;
+      this.getItemDetail(itemId);
+    }
   }
 }
 </script>

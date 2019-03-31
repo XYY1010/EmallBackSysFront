@@ -3,13 +3,13 @@
     <Alert show-icon class="tips-box" type="warning">
         小提示
         <Icon type="md-bulb" slot="icon"></Icon>
-        <template slot="desc">首页配件板块管理。</template>
+        <template slot="intro">首页手机板块管理。</template>
     </Alert>
     <div class="btns-div">
       <Button type="primary" icon="md-refresh" size="large" @click="changeAD">更换左侧宣传广告</Button>
       显示 <InputNumber v-model="pageSize" size="large" @on-change="changePageSize" :min="1" :max="8"></InputNumber> 条
     </div>
-    <Table border :columns="columns" :data="historyData" no-data-text="配件模块信息空空如也，请添加~~~"></Table>
+    <Table border :columns="columns" :data="historyData" no-data-text="手机模块信息空空如也，请添加~~~"></Table>
     <Page :total="dataCount" :page-size="pageSize" show-total class="paging" @on-change="changepage"></Page>
 
     <Modal
@@ -17,30 +17,43 @@
             title="更换左侧宣传图"
             @on-ok="ok"
             @on-cancel="cancel">
-            <Form :model="newPhoneData">
+            <Form :model="phonePropagandaData">
                 <Row :gutter="32">
                     <Col span="12">
                         <FormItem label="跳转链接" label-position="top">
-                            <Input v-model="newPhoneData.sourceUrl" placeholder="请输入跳转链接">
+                            <Input v-model="phonePropagandaData.sourceUrl" placeholder="请输入跳转链接">
                             </Input>
                         </FormItem>
                     </Col>
                     <Col span="12">
                         <FormItem label="宣传图Url" label-position="top">
-                          <Input v-model="newPhoneData.imgUrl" placeholder="请输入缩略图地址">
+                          <Input disabled v-model="phonePropagandaData.imgUrl" placeholder="请输入缩略图地址">
                           </Input>
                         </FormItem>
                     </Col>
                 </Row>
+
                 <Row :gutter="32">
                   <Col span="12">
                     <FormItem label="宣传图" label-position="top">
-                      <Img :src="newPhoneData.imgUrl" style="width:134px;height:314px;"/>
+                      <Img :src="phonePropagandaData.imgUrl" style="width:134px;height:314px;"/>
                     </FormItem>
                   </Col>
                   <Col span="12">
                       <FormItem label="上传宣传图" label-position="top">
-                        <Upload multiple ref="upload" :format="['jpg','jpeg','png']" :max-size="2048" :before-upload="handleBeforeUpload" :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize" type="drag" action="//jsonplaceholder.typicode.com/posts/">
+                        <Upload multiple 
+                        ref="upload"
+                        name="upfile"
+                        :format="['jpg','jpeg','png']" 
+                        :max-size="2048" 
+                        :headers="headers"
+                        :before-upload="handleBeforeUpload" 
+                        :on-format-error="handleFormatError" 
+                        :on-exceeded-size="handleMaxSize"
+                        :on-error="uploadError" 
+                        :on-success="addUploadSuccess" 
+                        type="drag" 
+                        action="http://localhost:8090/file/uploading">
                             <div style="width:134px;height:314px;padding: 157px 67px">
                                 <Icon type="md-add" size="20"></Icon>
                             </div>
@@ -52,18 +65,20 @@
             </Form>
         </Modal>
 
-    <Drawer
+        <Drawer
             title="修改"
             v-model="show"
             width="720"
             :mask-closable="false"
             :styles="styles"
-        >
+            >
             <Form :model="formData">
                 <Row :gutter="32">
                     <Col span="12">
-                        <FormItem label="商品名" label-position="top">
-                            <Input v-model="formData.title" placeholder="请输入商品名" />
+                        <FormItem label="选择商品" label-position="top">
+                            <Select v-model="selectedIndex" placeholder="请选择商品">
+                                <Option v-for="(item,index) in optionList" :key="index" :value="index">{{item.title}}</Option>
+                            </Select>
                         </FormItem>
                     </Col>
                     <Col span="12">
@@ -77,6 +92,7 @@
                     <Col span="12">
                         <FormItem label="现价" label-position="top">
                           <InputNumber
+                           disabled
                            size="large"
                            :min="0"
                            v-model="formData.price"
@@ -88,15 +104,31 @@
                           <InputNumber
                            size="large"
                            :min="0"
-                           v-model="formData.oldPrice===undefined?0:formData.oldPrice"
+                           v-model="formData.oldPrice"
                            :formatter="value => `￥ ${value}`"></InputNumber>
                         </FormItem>
                     </Col>
                 </Row>
                 <Row :gutter="32">
                     <Col span="12">
+                        <FormItem label="优惠类型" label-position="top">
+                            <Select v-model="formData.discountType" placeholder="请选择类型">
+                                <Option value="new">新品</Option>
+                                <Option value="discount">折扣</Option>
+                                <Option value="free">免邮</Option>
+                            </Select>
+                        </FormItem>
+                    </Col>
+                    <Col span="12">
+                        <FormItem label="优惠描述" label-position="top">
+                            <Input placeholder="请输入价格描述" v-model="formData.discount"></Input>
+                        </FormItem>
+                    </Col>
+                </Row>
+                <Row :gutter="32">
+                    <Col span="12">
                         <FormItem label="展示图Url" label-position="top">
-                          <Input v-model="formData.imgUrl" placeholder="请输入缩略图地址">
+                          <Input disabled v-model="formData.imgUrl" placeholder="请输入缩略图地址">
                           </Input>
                         </FormItem>
                     </Col>
@@ -116,7 +148,7 @@
                     </Col>
                     <Col span="12">
                       <FormItem label="商品描述" label-position="top">
-                        <Input type="textarea" v-model="formData.desc" :rows="7" placeholder="请输入商品描述" />
+                        <Input type="textarea" v-model="formData.intro" :rows="7" placeholder="请输入商品描述" />
                       </FormItem>
                     </Col>
                 </Row>
@@ -131,7 +163,7 @@
 
 <script>
 export default {
-  name: 'accessory',
+  name: 'phone',
   data() {
     return {
       ajaxHistoryData:[],
@@ -140,6 +172,13 @@ export default {
       // 每页显示多少条
       pageSize:5,
       historyData: [],
+      selectedIndex:'',
+      optionList:[],
+      oldItemId:'',
+      headers:{
+        'Access-Control-Allow-Methods': 'PUT,POST,GET,DELETE,OPTIONS',
+        'Access-Control-Allow-Origin': '*'
+      },
       loading: false,
       show: false,
       modal1: false,
@@ -178,6 +217,72 @@ export default {
           align: 'center'
         },
         {
+          title: '商品描述',
+          key: 'intro',
+          align: 'center'
+        },
+        {
+          title: '优惠类型',
+          key: 'discountType',
+          align: 'center',
+          render: (h, params) => {
+            if (params.row.discountType === 'new') {
+              return h('div', [
+                h('span', {
+                    attrs: {
+                      style: 'background-color: #83c44e; color: #fff; padding: 5px 5px 5px 5px;'
+                    }
+                }, "新品")
+              ])
+            } else if (params.row.discountType === 'free') {
+              return h('div', [
+                h('span', {
+                    attrs: {
+                      style: 'background-color: #ffac13; color: #fff; padding: 5px 5px 5px 5px;'
+                    }
+                }, "免邮")
+              ])
+            } else if (params.row.discountType === 'discount') {
+              return h('div', [
+                h('span', {
+                    attrs: {
+                      style: 'background-color: #e53935; color: #fff; padding: 5px 5px 5px 5px;'
+                    }
+                }, "折扣")
+              ])
+            }
+          },
+          filters: [
+            {
+              label: '新品',
+              value: 0
+            },
+            {
+              label: '折扣',
+              value: 1
+            },
+            {
+              label: '免邮',
+              value: 2
+            }
+          ],
+          filterMultiple: true,
+          filterMethod (value, row) {
+            if (value === 0) {
+                return row.discountType === 'new';
+            } else if (value === 1) {
+                return row.discountType === 'discount';
+            } else if (value === 2) {
+                return row.discountType === 'free';
+            }
+          }
+        },
+        {
+          title: '优惠描述',
+          key: 'discount',
+          align: 'center'
+        },
+        {
           title: '原价',
           key: 'oldPrice',
           align: 'center'
@@ -208,11 +313,17 @@ export default {
                   on: {
                     click: () => {
                       this.show = true;
+                      this.oldItemId = params.row.id;
+                      this.formData.itemId = params.row.id;
                       this.formData.title = params.row.title;
                       this.formData.sourceUrl = params.row.sourceUrl;
                       this.formData.imgUrl = params.row.imgUrl;
+                      this.formData.intro = params.row.intro;
                       this.formData.price = params.row.price;
+                      this.formData.oldPrice = params.row.oldPrice;
                       this.formData.sorted = params.row.sorted;
+                      this.formData.discount = params.row.discount;
+                      this.formData.discountType = params.row.discountType;
                     }
                   }
               })
@@ -220,16 +331,9 @@ export default {
           }
         }
       ],
-      accessoryData: [
-        {id: 1, sourceUrl: '//item.mi.com/1153300034.html', imgUrl: '//i2.mifile.cn/a1/T1COAjB7WT1RXrhCrK.jpg?width=150&height=150', title: '指环式防滑手机支架', price: '12.5', sorted: 1},
-				{id: 2, sourceUrl: '//item.mi.com/1151500039.html', imgUrl: '//i2.mifile.cn/a1/T1_SDgB4KT1RXrhCrK.jpg?width=150&height=150', title: '小米自拍杆', price: '49', sorted: 2},
-				{id: 3, sourceUrl: '//item.mi.com/1154900023.html', imgUrl: '//i2.mifile.cn/a1/T1l9WjBTbT1RXrhCrK.jpg?width=150&height=150', title: '青米USB快速充电数据线', price: '14.9', sorted: 3},
-				{id: 4, sourceUrl: '//item.mi.com/1135200036.html', imgUrl: '//i2.mifile.cn/a1/T1zL_vByCT1RXrhCrK.jpg?width=150&height=150', title: '小米随身WIFI', price: '19.9', sorted: 4},
-				{id: 5, sourceUrl: '//item.mi.com/1154900055.html', imgUrl: '//i2.mifile.cn/a1/T1AmJgBsKT1RXrhCrK.jpg?width=150&height=150', title: '苹果Lightning to USB数据线', price: '39', sorted: 5},
-				{id: 6, sourceUrl: '//item.mi.com/1162800007.html', imgUrl: '//i2.mifile.cn/a1/pms_1468287589.40786199.jpg?width=150&height=150', title: '米家随身风扇', price: '19.9', sorted: 6},
-				{id: 7, sourceUrl: '//item.mi.com/1144900003.html', imgUrl: '//i2.mifile.cn/a1/T1_8YvBKJT1RXrhCrK.jpg?width=150&height=150', title: '功夫米兔手机支架', price: '19', sorted: 7}
+      phoneData: [
       ],
-      accessoryPropagandaData: {
+      phonePropagandaData: {
         sourceUrl: '#',
         imgUrl: 'https://i1.mifile.cn/a4/xmad_1544580545953_UvEXK.jpg'
       },
@@ -241,36 +345,128 @@ export default {
         position: 'static'
       },
       formData: {
+        itemId: '',
         sourceUrl: '',
         imgUrl: '',
         title: '',
+        intro: '',
+        discountType: '',
+        discount: '',
         price: 0,
         oldPrice: 0,
         sorted: 0,
       },
-      newPhoneData: {
-        sourceUrl: '',
-        imgUrl: ''
-      },
     }
   },
   methods: {
+    getListDetail(listId){
+      this.$axios({
+        method:'get',
+        url:'/indexList/getIndexList',
+        params:{
+          listId:listId
+        }
+      }).then(res=>{
+        this.phonePropagandaData = res.data.data;
+      }).catch(error=>{
+        this.$Message.error("服务器错误！");
+      });
+    },
+    modifyphonePropagandaData(listId){
+      this.$axios({
+        method:'get',
+        url:'/indexList/modifyIndexList',
+        params:{
+          listId:listId,
+          sourceUrl:this.phonePropagandaData.sourceUrl,
+          imgUrl:this.phonePropagandaData.imgUrl
+        }
+      }).then(res=>{
+        this.$Message.success("更换成功！");
+      }).catch(error=>{
+        this.$Message.error("服务器错误,更换失败！");
+      });
+    },
+    getAllItem(listId){
+      this.$axios({
+        method:'get',
+        url:'/indexListItem/getAllItem',
+        params:{
+          listId:listId
+        }
+      }).then(res=>{
+        this.phoneData = res.data.data;
+        this.handleListApproveHistory();
+      }).catch(error=>{
+        this.$Message.error("服务器错误,获得列表失败!");
+      });
+    },
+    modifyItem(){
+      this.$axios({
+        method:'post',
+        url:'/indexListItem/modifyItem',
+        params:{
+          oldItemId:this.oldItemId,
+          itemId:this.formData.itemId,
+          listId:1002,
+          sourceUrl:this.formData.sourceUrl,
+          intro:this.formData.intro,
+          oldPrice:this.formData.oldPrice,
+          discountType:this.formData.discountType,
+          discount:this.formData.discount,
+          sorted:this.formData.sorted
+        }
+      }).then(res=>{
+        this.$Message.success("修改成功！");
+        this.oldItemId = '';
+        this.getAllItem(1002);
+      }).catch(error=>{
+        console.log(error);
+        this.oldItemId = '';
+        this.$Message.error("服务器错误,修改失败！");
+      });
+    },
+    getOptionList(){
+      this.$axios({
+        method:'get',
+        url:'/item/getByCatId',
+        params:{
+          catId: '14'
+        }
+      }).then(res=>{
+        this.optionList = res.data.data;
+      }).catch(error=>{
+        this.$Message.error("服务器错误");
+      });
+    },
+    getItemDetail(itemId){
+      this.$axios({
+        method:'get',
+        url:'/item/getItemDetail',
+        params:{
+          itemId:itemId
+        }
+      }).then(res=>{
+        this.formData.price = res.data.data.price;
+        this.formData.imgUrl = res.data.data.imgUrl;
+      }).catch(error=>{
+        this.$Message.error("服务器错误");
+      });
+    },
     changePageSize(size) {
       this.pageSize = size;
       this.handleListApproveHistory();
     },
     changeAD() {
       this.modal1 = true;
-      this.newPhoneData.sourceUrl = this.accessoryPropagandaData.sourceUrl;
-      this.newPhoneData.imgUrl = this.accessoryPropagandaData.imgUrl;
     },
     Submit() {
+      if(this.formData.oldPrice==undefined) this.formData.oldPrice = 0;
       this.show = false;
-       this.$Message.success('修改成功！');
+      this.modifyItem();
     },
     ok() {
-      this.$Message.success('更换成功！');
-      console.log(this.newPhoneData);
+      this.modifyphonePropagandaData(1002);
     },
     cancel() {
       this.$Message.success('取消更换！');
@@ -278,10 +474,10 @@ export default {
     // 获取历史记录信息
     handleListApproveHistory(){
       // 保存取到的所有数据
-      this.ajaxHistoryData = this.accessoryData
-      this.dataCount = this.accessoryData.length;
+      this.ajaxHistoryData = this.phoneData
+      this.dataCount = this.phoneData.length;
       // 初始化显示，小于每页显示条数，全显，大于每页显示条数，取前每页条数显示
-      if(this.accessoryData.length < this.pageSize){
+      if(this.phoneData.length < this.pageSize){
         this.historyData = this.ajaxHistoryData;
       }else{
         this.historyData = this.ajaxHistoryData.slice(0,this.pageSize);
@@ -309,18 +505,35 @@ export default {
     handleFormatError(file) {
       this.$Notice.warning({
         title: '文件格式不正确',
-        desc: '文件 ' + file.name + ' 格式不正确，请上传 jpg 或 png 格式的图片。'
+        intro: '文件 ' + file.name + ' 格式不正确，请上传 jpg 或 png 格式的图片。'
       })
     },
     handleMaxSize(file) {
       this.$Notice.warning({
         title: '超出文件大小限制',
-        desc: '文件 ' + file.name + ' 太大，不能超过 2M。'
+        intro: '文件 ' + file.name + ' 太大，不能超过 2M。'
       })
+    },
+    addUploadSuccess(res,file,fileList){
+      this.$Message.success("上传成功");
+      this.phonePropagandaData.imgUrl = res.data;
+    },
+    uploadError(a,b,c){
+      this.$Message.error(a.data);
     }
   },
   created(){
-    this.handleListApproveHistory();
+    this.getAllItem(1002);
+    this.getListDetail(1002);
+    this.getOptionList();
+  },
+  watch:{
+    selectedIndex(val,newVal){
+      var itemId = this.optionList[this.selectedIndex].itemId;
+      this.formData.itemId = itemId;
+      this.formData.title = this.optionList[this.selectedIndex].title;
+      this.getItemDetail(itemId);
+    }
   }
 }
 </script>
