@@ -42,10 +42,18 @@
                           </Col>
                       </Row>
                       <Row :gutter="32">
-                          <Col span="24">
-                              <FormItem label="轮播图Url">
-                                <Input v-model="newFigureData.imgUrl" placeholder="请输入缩略图地址">
-                                </Input>
+                          <Col span="12">
+                              <FormItem label="选择分类">
+                                <Select v-model="categoryIdSelected" placeholder="请选择分类">
+                                  <Option v-for="(item,index) in categoryList" :key="index" :value="item.categoryId">{{item.categoryName}}</Option>
+                                </Select>
+                              </FormItem>
+                          </Col>
+                          <Col span="12">
+                              <FormItem label="选择跳转商品">
+                                <Select v-model="itemIdSelected" placeholder="请选择商品">
+                                  <Option v-for="(item,index) in itemList" :key="index" :value="item.itemId">{{item.title}}</Option>
+                                </Select>
                               </FormItem>
                           </Col>
                       </Row>
@@ -62,7 +70,19 @@
                       <Row :gutter="32">
                           <Col span="24">
                               <FormItem label="上传轮播图" label-position="top">
-                                <Upload multiple ref="upload" :format="['jpg','jpeg','png']" :max-size="2048" :before-upload="handleBeforeUpload" :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize" type="drag" action="//jsonplaceholder.typicode.com/posts/">
+                                <Upload multiple 
+                                ref="upload"
+                                name="upfile"
+                                :headers="headers"
+                                :on-error="uploadError"
+                                :on-success="addUploadSuccess"
+                                :format="['jpg','jpeg','png']" 
+                                :max-size="2048" 
+                                :before-upload="handleBeforeUpload" 
+                                :on-format-error="handleFormatError" 
+                                :on-exceeded-size="handleMaxSize" 
+                                type="drag" 
+                                action="http://localhost:8090/file/uploading">
                                     <div style="padding: 20px 0">
                                         <Icon type="md-add" size="20"></Icon>
                                     </div>
@@ -72,57 +92,6 @@
                       </Row>
                     </Form>
                 </Modal>
-    <Drawer
-    title="修改"
-    v-model="show"
-    width="330"
-    :mask-closable="false"
-    :styles="styles"
-    >
-            <Form :model="formData">
-                <Row :gutter="32">
-                    <Col span="24">
-                        <FormItem label="跳转链接">
-                            <Input v-model="formData.sourceUrl" placeholder="请输入跳转链接">
-                            </Input>
-                        </FormItem>
-                    </Col>
-                </Row>
-                <Row :gutter="32">
-                    <Col span="24">
-                        <FormItem label="轮播图Url">
-                          <Input v-model="formData.imgUrl" placeholder="请输入缩略图地址">
-                          </Input>
-                        </FormItem>
-                    </Col>
-                </Row>
-                <FormItem label="轮播图" label-position="left">
-                  <Img :src="formData.imgUrl" style="width:300px;height:200px;"/>
-                </FormItem>
-                <Row :gutter="32">
-                    <Col span="24">
-                        <FormItem label="排序值">
-                          <InputNumber :max="10" :min="1" v-model="formData.sorted"></InputNumber>
-                        </FormItem>
-                    </Col>
-                </Row>
-                <Row :gutter="32">
-                    <Col span="24">
-                        <FormItem label="上传轮播图" label-position="top">
-                          <Upload multiple ref="upload" :format="['jpg','jpeg','png']" :max-size="2048" :before-upload="handleBeforeUpload" :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize" type="drag" action="//jsonplaceholder.typicode.com/posts/">
-                              <div style="padding: 20px 0">
-                                  <Icon type="md-add" size="20"></Icon>
-                              </div>
-                          </Upload>
-                        </FormItem>
-                    </Col>
-                </Row>
-            </Form>
-            <div class="drawer-footer">
-                <Button style="margin-right: 8px" @click="show = false">取消</Button>
-                <Button type="primary" @click="Submit()">提交修改</Button>
-            </div>
-        </Drawer>
   </div>
 </template>
 
@@ -143,6 +112,14 @@ export default {
       modalStatus2: false,
       rmIndex: -1,
       curPage: 1,
+      headers:{
+        'Access-Control-Allow-Methods': 'PUT,POST,GET,DELETE,OPTIONS',
+        'Access-Control-Allow-Origin': '*'
+      },
+      categoryIdSelected:'',
+      categoryList:[],
+      itemIdSelected:'',
+      itemList:[],
       columns: [
         {
           type: 'selection',
@@ -152,7 +129,7 @@ export default {
         },
         {
           title: 'ID',
-          key: 'id',
+          key: 'shufflingId',
           width: 70,
           align: 'center',
           sortable: true
@@ -203,20 +180,6 @@ export default {
             return h('div', [
               h('Icon', {
                   attrs: {
-                    type: "ios-create",
-                    size: 20
-                  },
-                  on: {
-                    click: () => {
-                      this.show = true;
-                      this.formData.sourceUrl = params.row.sourceUrl;
-                      this.formData.imgUrl = params.row.imgUrl;
-                      this.formData.sorted = params.row.sorted;
-                    }
-                  }
-              }),
-              h('Icon', {
-                  attrs: {
                     type: "ios-trash",
                     size: 20
                   },
@@ -232,12 +195,6 @@ export default {
         }
       ],
       shufflingFigureData: [
-        {id: 1, sourceUrl: '/goodsdetail', imgUrl: 'http://139.199.125.60/xmad1.jpg', sorted: 1, createdDate: '1970-01-01 00:00', updatedDate: '1970-01-01 00:00'},
-        {id: 2, sourceUrl: '/goodsdetail', imgUrl: 'http://139.199.125.60/xmad2.jpg', sorted: 2, createdDate: '1970-01-01 00:00', updatedDate: '1970-01-01 00:00'},
-        {id: 3, sourceUrl: '/goodsdetail', imgUrl: 'http://139.199.125.60/xmad3.jpg', sorted: 3, createdDate: '1970-01-01 00:00', updatedDate: '1970-01-01 00:00'},
-        {id: 4, sourceUrl: '/goodsdetail', imgUrl: 'http://139.199.125.60/xmad4.jpg', sorted: 4, createdDate: '1970-01-01 00:00', updatedDate: '1970-01-01 00:00'},
-        {id: 5, sourceUrl: '/goodsdetail', imgUrl: 'http://139.199.125.60/xmad5.jpg', sorted: 5, createdDate: '1970-01-01 00:00', updatedDate: '1970-01-01 00:00'},
-        {id: 6, sourceUrl: '/goodsdetail', imgUrl: 'http://139.199.125.60/xmad6.jpg', sorted: 6, createdDate: '1970-01-01 00:00', updatedDate: '1970-01-01 00:00'},
       ],
       show: false,
       styles: {
@@ -246,13 +203,8 @@ export default {
         paddingBottom: '53px',
         position: 'static'
       },
-      formData: {
-        id: '',
-        sourceUrl: '',
-        imgUrl: '',
-        sorted: 0,
-      },
       newFigureData: {
+        itemId:'',
         sourceUrl: '',
         imgUrl: '',
         sorted: 0,
@@ -261,6 +213,91 @@ export default {
     }
   },
   methods: {
+    getCategoryList(){
+      this.$axios({
+        method:'get',
+        url:'/Category/getAllCategoryVO'
+      }).then(res=>{
+        this.categoryList = res.data.data;
+      }).catch(error=>{
+        this.$Message.error("服务器错误！");
+      });
+    },
+    deleteShuffleFigure(idGroup){
+      this.$axios({
+        method:'get',
+        url:'/shufflingFigureData/deleteShufflingFigureData',
+        params:{
+          idGroup:idGroup
+        }
+      }).then(res=>{
+        if(this.rmIndex!=-1){
+          this.remove((this.curPage-1)*this.pageSize+this.rmIndex);
+          this.rmIndex = -1;
+        }else{
+          this.afterBatchDelete();
+        }
+      }).catch(error=>{
+        this.$Message.error("服务器错误,删除失败");
+      });
+    },
+    addNewShuffleFigure(){
+      if(this.newFigureData.itemId==undefined){
+        this.$Message.error("请选择跳转商品！");
+        return;
+      }
+      if(this.newFigureData.imgUrl==''){
+        this.$Message.error("请选择录播图！");
+        return;
+      }
+      if(this.newFigureData.sourceUrl=='') this.newFigureData.sourceUrl = '#';
+      this.$axios({
+        method:'post',
+        url:'/shufflingFigureData/addShufflingFigureData',
+        params:{
+          itemId:this.newFigureData.itemId,
+          sourceUrl:this.newFigureData.sourceUrl,
+          imgUrl:this.newFigureData.imgUrl,
+          sorted:this.newFigureData.sorted
+        }
+      }).then(res=>{
+        this.getAllShuffleFigure();
+      }).catch(error=>{
+        this.$Message.error("服务器错误,添加轮播图失败!");
+      });
+    },
+    getItemList(catId){
+      this.$axios({
+        method:'get',
+        url:'/item/getByCatId',
+        params:{
+          catId:catId
+        }
+      }).then(res=>{
+        this.itemList = res.data.data;
+      }).catch(error=>{
+        this.$Message.error("服务器错误!");
+      });
+    },
+    getAllShuffleFigure(){
+      this.$axios({
+        method:'get',
+        url:'/shufflingFigureData/getAllShuffleFigure'
+      }).then(res=>{
+        this.shufflingFigureData = res.data.data;
+        for(var i = 0; i < this.shufflingFigureData.length; i++){
+          this.shufflingFigureData[i].createdDate = this.dateUtil(this.shufflingFigureData[i].createdDate);
+          this.shufflingFigureData[i].updatedDate = this.dateUtil(this.shufflingFigureData[i].updatedDate);
+        }
+        this.handleListApproveHistory();
+      }).catch(error=>{
+        this.$Message.error("服务器错误,轮播图获得失败!");
+      });
+    },
+    dateUtil(originDate){
+      var date = new Date(+new Date(originDate)+8*3600*1000).toISOString().replace(/T/g,' ').replace(/\.[\d]{3}Z/,'');
+      return date.split(" ")[0];
+    },
     changePageSize(size) {
       this.pageSize = size;
       this.handleListApproveHistory();
@@ -284,17 +321,15 @@ export default {
       else if (this.shufflingFigureData.length > this.curPage * this.pageSize) {
         this.historyData = this.ajaxHistoryData.slice((this.curPage-1)*this.pageSize, this.curPage * this.pageSize);
       }
-      // 后端数据库删除请求
+      this.$Message.success('移除成功！');
+      this.rmIndex = -1;
     },
     select(selection) {
       this.Selected = selection;
     },
     ok() {
       if(this.rmIndex != -1) {
-          this.remove((this.curPage-1)*this.pageSize+this.rmIndex);
-          this.$Message.success('移除成功！');
-          this.rmIndex = -1;
-        // 后台数据更新
+          this.deleteShuffleFigure(this.historyData[this.rmIndex].shufflingId);
       }
     },
     cancel() {
@@ -326,11 +361,11 @@ export default {
         this.modalStatus1 = true;
       }
     },
-    ok1() {
+    afterBatchDelete(){
       this.Selected = this.$refs.selection.getSelection().splice(0);
       for (var i = 0; i < this.Selected.length; i++) {
         for (var j = 0; j < this.shufflingFigureData.length; j++) {
-          if (this.Selected[i].id === this.shufflingFigureData[j].id) {
+          if (this.Selected[i].shufflingId === this.shufflingFigureData[j].shufflingId) {
             this.shufflingFigureData.splice(j, 1);
             break;
           }
@@ -350,16 +385,21 @@ export default {
         this.historyData = this.ajaxHistoryData.slice((this.curPage-1)*this.pageSize, this.curPage * this.pageSize);
       }
       this.$Message.success('批量移除成功！');
-        // 后台数据更新
-      },
+    },
+    ok1() {
+      var idGroup = this.Selected[0].shufflingId;
+      for(var i = 1; i < this.Selected.length; i++){
+        idGroup += ","+ this.Selected[i].shufflingId;
+      }
+      this.deleteShuffleFigure(idGroup);
+    },
     cancel1() {
       this.$Message.success('取消移除！');
     },
     ok2() {
-      this.handleListApproveHistory();
+      this.addNewShuffleFigure();
       this.$Message.success('添加成功！');
-        // 后台数据更新
-      },
+    },
     cancel2() {
       this.$Message.success('取消添加！');
     },
@@ -374,7 +414,6 @@ export default {
         const _this = this
         reader.onloadend = function (e) {
             file.url = reader.result;
-            _this.formData.imgUrl = file;
         }
     },
     handleFormatError(file) {
@@ -388,10 +427,26 @@ export default {
         title: '超出文件大小限制',
         desc: '文件 ' + file.name + ' 太大，不能超过 2M。'
       })
+    },
+    addUploadSuccess(res,file,fileList){
+      this.$Message.success("上传成功");
+      this.newFigureData.imgUrl = res.data;
+    },
+    uploadError(a,b,c){
+      this.$Message.error(a.data);
     }
   },
   created(){
-    this.handleListApproveHistory();
+    this.getAllShuffleFigure();
+    this.getCategoryList();
+  },
+  watch:{
+    categoryIdSelected(val,newVal){
+      this.getItemList(this.categoryIdSelected);
+    },
+    itemIdSelected(val,newVal){
+      this.newFigureData.itemId = this.itemIdSelected;
+    }
   }
 }
 </script>

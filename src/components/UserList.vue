@@ -790,12 +790,10 @@ export default {
     addUploadSuccess(res,file,fileList){
       this.$Message.success("上传成功");
       this.newUserData.avatarUrl = res.data;
-      alert(this.newUserData.avatarUrl);
     },
     modifyUploadSuccess(res,file,fileList){
       this.$Message.success("上传成功");
       this.formData.avatarUrl = res.data;
-      alert(this.formData.avatarUrl);
     },
     uploadError(a,b,c){
       this.$Message.error(a.data);
