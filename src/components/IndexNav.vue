@@ -34,33 +34,29 @@
                     @on-cancel="cancel2">
                     <Form :model="newNavData">
                         <Row :gutter="32">
-                            <Col span="12">
-                                <FormItem label="导航商品名" label-position="top">
-                                    <Input v-model="newNavData.name" placeholder="请输入导航商品名" />
+                             <Col span="12">
+                                <FormItem label="所在分类" label-position="top">
+                                    <Select v-model="selectedCategoryIndex" placeholder="请选择分类">
+                                        <Option v-for="(item,index) in categoryList" :key="index" :value="index">
+                                        {{item.categoryName}}</Option>
+                                    </Select>
                                 </FormItem>
                             </Col>
+                            <Col span="12">
+                                <FormItem label="所选商品" label-position="top">
+                                    <Select v-model="selectedItemIndex" placeholder="请选择商品">
+                                        <Option v-for="(item,index) in itemList" :key="index" :value="index">
+                                        {{item.title}}</Option>
+                                    </Select>
+                                </FormItem>
+                            </Col>
+                            
+                        </Row>
+                        <Row :gutter="32">
                             <Col span="12">
                                 <FormItem label="跳转链接" label-position="top">
                                     <Input v-model="newNavData.sourceUrl" placeholder="请输入跳转链接">
                                     </Input>
-                                </FormItem>
-                            </Col>
-                        </Row>
-                        <Row :gutter="32">
-                            <Col span="12">
-                                <FormItem label="所在分类" label-position="top">
-                                    <Select v-model="newNavData.classify" placeholder="请选择分类">
-                                        <Option value="手机 电话卡">手机 电话卡</Option>
-                                        <Option value="电视 盒子">电视 盒子</Option>
-                                        <Option value="笔记本 平板">笔记本 平板</Option>
-                                        <Option value="家电 插线板">家电 插线板</Option>
-                                        <Option value="出行 穿戴">出行 穿戴</Option>
-                                        <Option value="智能 路由器">智能 路由器</Option>
-                                        <Option value="电源 配件">电源 配件</Option>
-                                        <Option value="健康 儿童">健康 儿童</Option>
-                                        <Option value="耳机 音响">耳机 音响</Option>
-                                        <Option value="生活 箱包">生活 箱包</Option>
-                                    </Select>
                                 </FormItem>
                             </Col>
                             <Col span="12">
@@ -75,7 +71,7 @@
                         <Row :gutter="32">
                             <Col span="12">
                                 <FormItem label="缩略图Url" label-position="top">
-                                  <Input v-model="newNavData.imgUrl" placeholder="请输入缩略图地址">
+                                  <Input disabled v-model="newNavData.imgUrl" placeholder="请输入缩略图地址">
                                   </Input>
                                 </FormItem>
                             </Col>
@@ -85,70 +81,7 @@
                         </FormItem>
                     </Form>
                 </Modal>
-    <Drawer
-            title="修改"
-            v-model="show"
-            width="720"
-            :mask-closable="false"
-            :styles="styles"
-        >
-            <Form :model="formData">
-                <Row :gutter="32">
-                    <Col span="12">
-                        <FormItem label="导航商品名" label-position="top">
-                            <Input v-model="formData.name" placeholder="请输入导航商品名" />
-                        </FormItem>
-                    </Col>
-                    <Col span="12">
-                        <FormItem label="跳转链接" label-position="top">
-                            <Input v-model="formData.sourceUrl" placeholder="请输入跳转链接">
-                            </Input>
-                        </FormItem>
-                    </Col>
-                </Row>
-                <Row :gutter="32">
-                    <Col span="12">
-                        <FormItem label="所在分类" label-position="top">
-                            <Select v-model="formData.classify" placeholder="请选择分类">
-                                <Option value="手机 电话卡">手机 电话卡</Option>
-                                <Option value="电视 盒子">电视 盒子</Option>
-                                <Option value="笔记本 平板">笔记本 平板</Option>
-                                <Option value="家电 插线板">家电 插线板</Option>
-                                <Option value="出行 穿戴">出行 穿戴</Option>
-                                <Option value="智能 路由器">智能 路由器</Option>
-                                <Option value="电源 配件">电源 配件</Option>
-                                <Option value="健康 儿童">健康 儿童</Option>
-                                <Option value="耳机 音响">耳机 音响</Option>
-                                <Option value="生活 箱包">生活 箱包</Option>
-                            </Select>
-                        </FormItem>
-                    </Col>
-                    <Col span="12">
-                        <FormItem label="购买状态" label-position="top">
-                            <Select v-model="formData.buyStatus" placeholder="请选择购买状态">
-                                <Option value="true">可购买</Option>
-                                <Option value="false">售罄</Option>
-                            </Select>
-                        </FormItem>
-                    </Col>
-                </Row>
-                <Row :gutter="32">
-                    <Col span="12">
-                        <FormItem label="缩略图Url" label-position="top">
-                          <Input v-model="formData.imgUrl" placeholder="请输入缩略图地址">
-                          </Input>
-                        </FormItem>
-                    </Col>
-                </Row>
-                <FormItem label="缩略图" label-position="top">
-                  <Img :src="formData.imgUrl" style="width:300px;height:200px;"/>
-                </FormItem>
-            </Form>
-            <div class="drawer-footer">
-                <Button style="margin-right: 8px" @click="show = false">取消</Button>
-                <Button type="primary" @click="Submit()">提交修改</Button>
-            </div>
-        </Drawer>
+        
   </div>
 </template>
 
@@ -169,6 +102,10 @@ export default {
       modalStatus1: false,
       modalStatus2: false,
       rmIndex: -1,
+      categoryList:[],
+      selectedCategoryIndex:'',
+      itemList:[],
+      selectedItemIndex:'',
       columns: [
         {
           type: 'selection',
@@ -179,14 +116,14 @@ export default {
         {
           title: 'ID',
           key: 'id',
-          width: 70,
+          width: 170,
           align: 'center',
           sortable: true
         },
         {
           title: '缩略图',
           key: 'img',
-          width: 86,
+          width: 100,
           render: (h, params) => {
             return h('div', [
               h('img', {
@@ -330,23 +267,6 @@ export default {
             return h('div', [
               h('Icon', {
                   attrs: {
-                    type: "ios-create",
-                    size: 20
-                  },
-                  on: {
-                    click: () => {
-                      this.show = true;
-                      this.formData.id = params.row.id;
-                      this.formData.sourceUrl = params.row.sourceUrl;
-                      this.formData.imgUrl = params.row.imgUrl;
-                      this.formData.name = params.row.name;
-                      this.formData.buyStatus = params.row.buyStatus;
-                      this.formData.classify = params.row.classify;
-                    }
-                  }
-              }),
-              h('Icon', {
-                  attrs: {
                     type: "ios-trash",
                     size: 20
                   },
@@ -362,28 +282,6 @@ export default {
         }
       ],
       navData: [
-				  {id: 1, sourceUrl: '/goodslist', buyUrl: '/', imgUrl: 'http://139.199.125.60/xm5sp.png', name: '小米5s plus', buyStatus: true, classify: '手机 电话卡'},
-          {id: 2, sourceUrl: '/goodslist', buyUrl: '/', imgUrl: 'http://139.199.125.60/xm5s.jpg', name: '小米5s', buyStatus: true, classify: '手机 电话卡'},
-          {id: 3, sourceUrl: '/goodslist', buyUrl: '/', imgUrl: 'http://139.199.125.60/MIX.jpg', name: '小米mix', buyStatus: true, classify: '手机 电话卡'},
-          {id: 4, sourceUrl: '/goodslist', buyUrl: '/', imgUrl: 'http://139.199.125.60/xm6.png', name: '小米6', buyStatus: true, classify: '手机 电话卡'},
-          {id: 5, sourceUrl: '/goodslist', buyUrl: '/', imgUrl: 'http://139.199.125.60/xiaomiNOTE2.jpg', name: '小米Note2', buyStatus: true, classify: '手机 电话卡'},
-          {id: 6, sourceUrl: '/goodslist', buyUrl: '/', imgUrl: 'http://139.199.125.60/max2.png', name: '小米Max2', buyStatus: true, classify: '手机 电话卡'},
-          {id: 7, sourceUrl: '/goodslist', buyUrl: '/', imgUrl: 'http://139.199.125.60/mi5c.png', name: '小米5c', buyStatus: true, classify: '手机 电话卡'},
-          {id: 8, sourceUrl: '/goodslist', buyUrl: '/', imgUrl: 'http://139.199.125.60/hm4.jpg', name: '红米4', buyStatus: true, classify: '手机 电话卡'},
-          {id: 9, sourceUrl: '/goodslist', buyUrl: '/', imgUrl: 'http://139.199.125.60/hm4x.jpg', name: '红米4x', buyStatus: true, classify: '手机 电话卡'},
-          {id: 10, sourceUrl: '/goodslist', buyUrl: '/', imgUrl: 'http://139.199.125.60/4g+.jpg', name: '移动4G+专区', buyStatus: true, classify: '手机 电话卡'},
-          {id: 11, sourceUrl: '/goodslist', buyUrl: '/', imgUrl: 'http://139.199.125.60/compare.jpg', name: '手机对比服务', buyStatus: true, classify: '手机 电话卡'},
-          {id: 12, sourceUrl: '/goodslist', buyUrl: '/', imgUrl: 'http://139.199.125.60/mimobile.jpg', name: '小米电话卡', buyStatus: true, classify: '手机 电话卡'},
-    			{id: 13, sourceUrl: '/goodslist', imgUrl: 'http://139.199.125.60/baohutao.jpg', name: '手机保护套', buyStatus: false, classify: '手机 电话卡'},
-          {id: 14, sourceUrl: '/goodslist', buyUrl: '/', imgUrl: 'http://139.199.125.60/xmyyong.png', name: '小米应用', buyStatus: true, classify: '手机 电话卡'},
-          {id: 15, sourceUrl: '/goodslist', buyUrl: '/', imgUrl: 'http://139.199.125.60/bijiben12.5.jpg', name: '小米笔记本12.5寸', buyStatus: true, classify: '笔记本 平板'},
-    			{id: 16,sourceUrl: '/goodslist', buyUrl: '/', imgUrl: 'http://139.199.125.60/bijiben13.3.jpg', name: '小米笔记本13.3寸', buyStatus: true, classify: '笔记本 平板'},
-          {id: 17,sourceUrl: '/goodslist', buyUrl: '/', imgUrl: 'http://139.199.125.60/mipad3.png', name: '小米pad3', buyStatus: false, classify: '笔记本 平板'},
-          {id: 18,sourceUrl: '/goodslist', buyUrl: '/', imgUrl: 'http://139.199.125.60/xmymjp.png', name: '小米键盘', buyStatus: true, classify: '笔记本 平板'},
-          {id: 19,sourceUrl: '/goodslist', buyUrl: '/', imgUrl: 'http://139.199.125.60/shubiao.jpg', name: '小米鼠标', buyStatus: true, classify: '笔记本 平板'},
-          {id: 20,sourceUrl: '/goodslist', buyUrl: '/', imgUrl: 'http://139.199.125.60/usbc-zjq.jpg', name: '转接器', buyStatus: true, classify: '笔记本 平板'},
-          {id: 21,sourceUrl: '/goodslist', buyUrl: '/', imgUrl: 'http://139.199.125.60/xmjjsjb.jpg', name: '笔记本电脑双肩包', buyStatus: true, classify: '笔记本 平板'},
-          {id: 22,sourceUrl: '/goodslist', buyUrl: '/', imgUrl: 'http://139.199.125.60/neidanbao.jpg', name: '内胆包', buyStatus: true, classify: '笔记本 平板'},
       ],
       show: false,
       styles: {
@@ -392,15 +290,8 @@ export default {
         paddingBottom: '53px',
         position: 'static'
       },
-      formData: {
-        id: '',
-        sourceUrl: '',
-        imgUrl: '',
-        name: '',
-        buyStatus: '',
-        classify: '',
-      },
       newNavData: {
+        id:'',
         sourceUrl: '',
         imgUrl: '',
         name: '',
@@ -411,6 +302,88 @@ export default {
     }
   },
   methods: {
+    getAllNavigationItem(){
+      this.$axios({
+        method:'get',
+        url:'/navigationItem/getAllNavigationItem'
+      }).then(res=>{
+        this.navData = res.data.data;
+        this.handleListApproveHistory();
+      }).catch(error=>{
+        this.$Message.error("服务器错误,获得数据失败");
+      });
+    },
+    getCategoryList(){
+      this.$axios({
+        method:'get',
+        url:'/Category/getAllCategoryVO'
+      }).then(res=>{
+        this.categoryList = res.data.data;
+      }).catch(error=>{
+        this.$Message.error("服务器错误！");
+      });
+    },
+    getItemList(catId){
+      this.$axios({
+        method:'get',
+        url:'/item/getByCatId',
+        params:{
+          catId:catId
+        }
+      }).then(res=>{
+        this.itemList = res.data.data;
+      }).catch(error=>{
+        this.$Message.error("服务器错误!");
+      });
+    },
+    getItemDetail(itemId){
+      this.$axios({
+        method:'get',
+        url:'/item/getItemDetail',
+        params:{
+          itemId:itemId
+        }
+      }).then(res=>{
+        this.newNavData.imgUrl = res.data.data.imgUrl;
+      }).catch(error=>{
+        this.$Message.error('服务器错误！'+error);
+      });
+    },
+    addNavigationItem(){
+      this.$axios({
+        method:'post',
+        url:'/navigationItem/addNavigationItem',
+        params:{
+          itemId:this.newNavData.id,
+          sourceUrl:this.newNavData.sourceUrl,
+          buyStatus:this.newNavData.buyStatus
+        }
+      }).then(res=>{
+        this.$Message.success("导航商品添加成功！");
+        this.getAllNavigationItem();
+      }).catch(error=>{
+        this.$Message.error("服务器错误，导航商品添加失败！");
+      });
+    },
+    deleteNavigationItem(idGroup){
+      this.$axios({
+        method:'get',
+        url:'/navigationItem/deleteNavigationItem',
+        params:{
+          idGroup:idGroup
+        }
+      }).then(res=>{
+        if(this.rmIndex!=-1){
+          this.remove((this.curPage-1)*this.pageSize+this.rmIndex);
+          this.$Message.success('移除成功！');
+          this.rmIndex = -1;
+        }else{
+          this.afterBatchDelete();
+        }
+      }).catch(error=>{
+        this.$Message.error("服务器错误 "+error);
+      });
+    },
     changePageSize(size) {
       this.pageSize = size;
       this.handleListApproveHistory();
@@ -442,10 +415,7 @@ export default {
     },
     ok() {
       if(this.rmIndex != -1) {
-          this.remove((this.curPage-1)*this.pageSize+this.rmIndex);
-          this.$Message.success('移除成功！');
-          this.rmIndex = -1;
-        // 后台数据更新
+        this.deleteNavigationItem(this.historyData[this.rmIndex].id);
       }
     },
     cancel() {
@@ -477,7 +447,7 @@ export default {
         this.modalStatus1 = true;
       }
     },
-    ok1() {
+    afterBatchDelete(){
       this.Selected = this.$refs.selection.getSelection().splice(0);
       for (var i = 0; i < this.Selected.length; i++) {
         for (var j = 0; j < this.navData.length; j++) {
@@ -502,23 +472,43 @@ export default {
         this.historyData = this.ajaxHistoryData.slice((this.curPage-1)*this.pageSize, this.curPage * this.pageSize);
       }
       this.$Message.success('批量移除成功！');
-        // 后台数据更新
-      },
+    },
+    ok1() {
+      var idGroup = this.navSelected[0].id;
+      for(var i = 1; i < this.navSelected.length; i++){
+        idGroup += "," + this.navSelected[i].id;
+      }
+      this.deleteNavigationItem(idGroup);
+    },
     cancel1() {
       this.$Message.success('取消移除！');
     },
     ok2() {
-      console.log(this.newNavData);
+      this.addNavigationItem();
       this.handleListApproveHistory();
-      this.$Message.success('添加成功！');
-        // 后台数据更新
-      },
+      this.$Message.success('添加成功！');  
+    },
     cancel2() {
       this.$Message.success('取消添加！');
     }
   },
   created(){
-    this.handleListApproveHistory();
+    this.getAllNavigationItem();
+    this.getCategoryList();
+  },
+  watch:{
+    selectedCategoryIndex(val,newVal){
+      this.getItemList(this.categoryList[this.selectedCategoryIndex].categoryId);
+    },
+    selectedItemIndex(val,newVal){
+      if(this.selectedItemIndex!=undefined){
+        var itemId = this.itemList[this.selectedItemIndex].itemId;
+        this.getItemDetail(itemId);
+        this.newNavData.id = itemId;
+        this.newNavData.classify = this.categoryList[this.selectedCategoryIndex].categoryName;
+        this.newNavData.name = this.itemList[this.selectedItemIndex].title;
+      }
+    }
   }
 }
 </script>
