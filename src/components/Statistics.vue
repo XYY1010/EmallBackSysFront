@@ -64,10 +64,10 @@ export default {
                   type: 'value',
                   name: '销售额',
                   min: 0,
-                  max: 250,
-                  interval: 50,
+                  max: 100000,
+                  interval: 10000,
                   axisLabel: {
-                      formatter: '{value} 万元'
+                      formatter: '{value} 元'
                   }
               },
               {
@@ -77,7 +77,7 @@ export default {
                   max: 25,
                   interval: 5,
                   axisLabel: {
-                      formatter: '{value} 万件'
+                      formatter: '{value} 件'
                   }
               }
           ],
@@ -85,12 +85,12 @@ export default {
               {
                   name:'销售额',
                   type:'bar',
-                  data:[2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162.2, 32.6, 20.0, 6.4, 3.3]
+                  data:[]
               },
               {
                   name:'销量',
                   type:'bar',
-                  data:[2.6, 5.9, 9.0, 26.4, 28.7, 70.7, 175.6, 182.2, 48.7, 18.8, 6.0, 2.3]
+                  data:[]
               }
           ]
       },
@@ -100,6 +100,17 @@ export default {
     }
   },
   methods: {
+    getStatistic(){
+      this.$axios({
+        method:'get',
+        url:'/Statistic/getStatistic'
+      }).then(res=>{
+        this.option1.series[0].data = res.data.data.sales;
+        this.option1.series[1].data = res.data.data.items;
+      }).catch(error=>{
+        this.$Message.error(error);
+      });
+    },
     initChart() {
       this.chart = this.$echarts.init(this.$refs.echart1);
       // 把配置和数据放这里
@@ -141,8 +152,11 @@ export default {
     }
   },
   mounted() {
-    this.initChart();
-  }
+    this.getStatistic();
+    setTimeout(() => {
+      this.initChart();
+        }, 500);
+    }
 }
 </script>
 
