@@ -130,7 +130,7 @@ export default {
         {
           title: 'ID',
           key: 'shufflingId',
-          width: 70,
+          width: 170,
           align: 'center',
           sortable: true
         },

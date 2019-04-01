@@ -186,7 +186,7 @@ export default {
         {
           title: 'ID',
           key: 'id',
-          width: 70,
+          width: 170,
           align: 'center',
           sortable: true
         },

@@ -30,6 +30,32 @@ export default {
     }
   },
   methods: {
+    checkPassword(user){
+      this.$axios({
+        method:'get',
+        url:'/admin/getPassword',
+        params:{
+          adminName:user
+        }
+      }).then(res=>{
+        if(res.data.status=="false"){
+          this.$Message.error(res.data.data);
+          return ;
+        }
+        if(this.form.password==res.data.data){
+          this.$store.commit('initUser', {user: {
+              userName: this.form.user,
+              password: this.form.password,
+          }});
+          this.$Message.success("登录成功");
+          this.$router.push("/index-content/index-nav");
+        }else{
+          this.$Message.error("密码输入错误");
+        }
+      }).catch(error=>{
+        this.$Message.error(error);
+      });
+    },
     Submit() {
       if (this.form.user.length === 0) {
         this.$Message.error("请输入用户名！！");
@@ -38,12 +64,7 @@ export default {
         this.$Message.error("请输入密码！！");
       }
       if(this.form.user.length != 0 && this.form.password.length != 0) {
-        this.$store.commit('initUser', {user: {
-              userName: this.form.user,
-              password: this.form.password,
-        }});
-        this.$Message.success("登录成功");
-        this.$router.push("/index-content/index-nav");
+        this.checkPassword(this.form.user);
       }
     }
   },
