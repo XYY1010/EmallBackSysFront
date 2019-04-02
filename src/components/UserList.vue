@@ -114,7 +114,7 @@
           </Col>
           <Col span="12">
             <FormItem label="上传头像" label-position="top">
-              <Upload  ref="upload" name="upfile" :headers="headers" :on-error="uploadError" :on-success="addUploadSuccess" :format="['jpg','jpeg','png']" :max-size="2048" :before-upload="handleBeforeUpload" :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize" type="drag" action="http://localhost:8090/file/uploading">
+              <Upload  ref="upload" name="upfile" :headers="headers" :on-error="uploadError" :on-success="addUploadSuccess" :format="['jpg','jpeg','png']" :max-size="2048" :before-upload="handleBeforeUpload" :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize" type="drag" action="http://139.199.125.60:8090/file/uploading">
                   <div style="padding: 20px 0">
                       <Icon type="md-add" size="20"></Icon>
                   </div>
@@ -194,7 +194,7 @@
           </Col>
           <Col span="12">
             <FormItem label="上传头像" label-position="top">
-              <Upload ref="upload" :headers="headers" name="upfile" :on-error="uploadError" :on-success="modifyUploadSuccess" :format="['jpg','jpeg','png']" :max-size="2048" :before-upload="handleBeforeUpload" :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize" type="drag" action="http://localhost:8090/file/uploading">
+              <Upload ref="upload" :headers="headers" name="upfile" :on-error="uploadError" :on-success="modifyUploadSuccess" :format="['jpg','jpeg','png']" :max-size="2048" :before-upload="handleBeforeUpload" :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize" type="drag" action="http://139.199.125.60:8090/file/uploading">
                   <div style="padding: 20px 0">
                       <Icon type="md-add" size="20"></Icon>
                   </div>

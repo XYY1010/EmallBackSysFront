@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // axios.defaults.baseURL = 'http://139.198.15.172:8080';
-axios.defaults.baseURL = 'http://localhost:8090';
+axios.defaults.baseURL = 'http://139.199.125.60:8090';
 axios.defaults.headers = {
 
   // 'Content-Type': 'application/json;charset=utf-8',

@@ -82,7 +82,7 @@
                                 :on-format-error="handleFormatError" 
                                 :on-exceeded-size="handleMaxSize" 
                                 type="drag" 
-                                action="http://localhost:8090/file/uploading">
+                                action="http://139.199.125.60:8090/file/uploading">
                                     <div style="padding: 20px 0">
                                         <Icon type="md-add" size="20"></Icon>
                                     </div>

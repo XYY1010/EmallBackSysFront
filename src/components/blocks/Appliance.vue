@@ -53,7 +53,7 @@
                         :on-error="uploadError" 
                         :on-success="addUploadSuccess" 
                         type="drag" 
-                        action="http://localhost:8090/file/uploading">
+                        action="http://139.199.125.60:8090/file/uploading">
                             <div style="width:134px;height:314px;padding: 157px 67px">
                                 <Icon type="md-add" size="20"></Icon>
                             </div>
